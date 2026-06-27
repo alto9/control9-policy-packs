@@ -1,0 +1,9 @@
+{
+  "name": "control9-policy-packs",
+  "description": "Versioned baseline policy packs and semantic change classifiers for Control9: CDK/CloudFormation, Terraform/OpenTofu, production mutation, IAM privilege expansion, destructive changes, secrets exposure hints, unapproved pipeline sources, and cloud cost thresholds.",
+  "type": "opensource",
+  "metadata_path": ".ai",
+  "code_path": ".",
+  "github_url": "https://github.com/alto9/control9-policy-packs",
+  "github_board": "https://github.com/orgs/alto9/projects/9"
+}

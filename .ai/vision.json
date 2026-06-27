@@ -1,0 +1,59 @@
+{
+  "vision": {
+    "title": "Control9 Policy Packs",
+    "mission": "Give Control9 customers trustworthy baseline controls for common infrastructure risk so they can move from shadow-mode assessment to enforce-mode governance without writing every rule from scratch.",
+    "core_purpose": "This repo owns versioned policy packs and semantic classifiers for CDK/CloudFormation and Terraform/OpenTofu. It translates repeated Alto9 assessment findings into deterministic policies that produce allow, deny, approval-required, and observe decisions with clear reasons and evidence defaults.",
+    "key_architecture": "Policy packs should be versioned, testable, and readable. They cover friendly policy documents, compiled rule definitions, classifier fixtures, examples, and metadata for production mutation, IAM privilege expansion, new roles, cross-account access, destructive changes, secrets exposure hints, unapproved pipeline sources, cloud cost thresholds, and off-path CloudTrail findings.",
+    "long_term_vision": {
+      "strategic_goals": {
+        "short_term": "Define the built-in MVP policy pack and baseline classifiers for CDK/CloudFormation and Terraform/OpenTofu: IAM expansion, new role, destructive change, network boundary change, production target, secrets exposure hints, and unapproved pipeline source.",
+        "medium_term": "Add policy versioning, dry-run fixtures, tenant policy configuration examples, exception patterns, deploy verification rules, and assessment report mappings so SaaS decisions are deterministic and explainable.",
+        "long_term": "Support managed controls and enterprise libraries with curated packs, custom policy authoring, exception workflows, SIEM/GRC-friendly metadata, retention defaults, and optional OPA/Rego import only if enterprise buyers need it."
+      }
+    },
+    "key_principles": [
+      {
+        "priority": 1,
+        "text": "Policies should express infrastructure governance meaning, not force users to reason only in low-level syntax."
+      },
+      {
+        "priority": 2,
+        "text": "Every decision must carry a policy version, matched rule, risk summary, clear reason, and enough fixture coverage to be repeatable in tests and production."
+      },
+      {
+        "priority": 3,
+        "text": "Baseline packs should make common production risk boring: IAM expansion requires approval, destructive production changes deny by default, and unmatched CloudTrail mutations are observed as high-severity off-path events."
+      },
+      {
+        "priority": 4,
+        "text": "Policy packs must work in shadow mode and enforce mode. The same input envelope should produce the same semantic result regardless of whether the product blocks the action."
+      },
+      {
+        "priority": 5,
+        "text": "Do not make OPA/Rego the default product contract. Import or interop can come later if it helps enterprise buyers."
+      }
+    ],
+    "market_strategy": {
+      "competitive_advantages": [
+        {
+          "priority": 1,
+          "text": "Curated policy packs turn Alto9 implementation experience into repeatable SaaS controls customers can adopt quickly."
+        },
+        {
+          "priority": 2,
+          "text": "Semantic classifiers help customers see the infrastructure risks platform leads care about, instead of raw diff noise."
+        }
+      ],
+      "differentiation_from_competitors": [
+        {
+          "priority": 1,
+          "text": "Unlike generic policy-as-code libraries, Control9 packs are tied to action envelopes, approvals, artifact fingerprints, and evidence timelines."
+        },
+        {
+          "priority": 2,
+          "text": "Unlike audit-only tools, the same pack can explain shadow findings, require human approval, deny unsafe production work, and flag off-path cloud mutations."
+        }
+      ]
+    }
+  }
+}
