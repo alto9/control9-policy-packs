@@ -10,8 +10,10 @@ This doc describes boundary shapes, redaction expectations, fingerprints, summar
 - Terraform/OpenTofu examples represent workspace or environment identity, resource address, provider metadata, action sequence, IAM and network deltas, destructive operations, secrets exposure hints, cost threshold signals, plan fingerprints, and parser limitations when present.
 - Pipeline and deploy examples represent source authority, artifact or plan fingerprints, requested deploy authority, approval relationship, and deploy verification mismatch signals.
 - Cloud audit/off-path examples represent observed event source, cloud resource identity, actor or principal summary, event time, correlation result, and evidence redaction defaults.
+- Decision output serializes the pack name, pack semantic version, matched rule ID, matched classifier labels, product decision, severity or risk, reason, risk summary, relevant change types, evidence references, fixture identity when applicable, and parser limitations when they affect the result.
+- Decision output does not serialize raw secret values, excessive template or plan fragments, tenant-specific approver configuration, or customer override state.
 - Compiled artifacts are referenced by manifest metadata and fixture reports. Human-readable examples remain reviewable without requiring readers to inspect compiled output.
 
 ## Open implementation decisions
 
-No unresolved implementation decisions remain here for issue #2.
+No unresolved implementation decisions remain here for baseline pack serialization.
