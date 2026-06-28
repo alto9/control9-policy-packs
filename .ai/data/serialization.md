@@ -13,6 +13,8 @@ This doc describes boundary shapes, redaction expectations, fingerprints, summar
 - Decision output serializes the pack name, pack semantic version, matched rule ID, matched classifier labels, product decision, severity or risk, reason, risk summary, relevant change types, evidence references, fixture identity when applicable, and parser limitations when they affect the result.
 - Decision output does not serialize raw secret values, excessive template or plan fragments, tenant-specific approver configuration, or customer override state.
 - Compiled artifacts are referenced by manifest metadata and fixture reports. Human-readable examples remain reviewable without requiring readers to inspect compiled output.
+- Classifier fixture files separate source input, expected semantic labels, expected policy result metadata, and fixture notes so reviewer-facing examples can stay readable while machine checks remain deterministic.
+- Fixture expected output includes enough stable identity to compare CDK/CloudFormation and Terraform/OpenTofu results without depending on parser ordering: fixture ID, tool family, normalized resource identity, matched classifier labels, relevant change types, matched rule IDs when policy evaluation is included, decision effect, severity or risk, reason, risk summary, evidence references, and parser limitations when present.
 
 ## Open implementation decisions
 
