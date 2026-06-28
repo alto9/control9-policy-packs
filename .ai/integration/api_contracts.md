@@ -7,6 +7,7 @@ This doc describes service boundaries and request or response responsibilities w
 - control9 consumes pack versions to produce deterministic decisions.
 - control9-integrations sends summaries and fingerprints and does not evaluate complete policy packs locally.
 - The pack consumption boundary is manifest-driven: control9 selects a pinned pack version, checks SaaS policy-engine compatibility metadata, loads referenced policy artifacts, and evaluates fixtures or live envelopes against that version.
+- The compatibility check consumes manifest metadata from this repository only. It verifies the pack identity, pack semantic version, manifest schema version, SaaS policy-engine compatibility range, release status, artifact references, fixture suite references, artifact digests or fingerprints, and provenance before control9 accepts the pack for evaluation.
 - Fixture runner expectations are part of the pack contract. Runner output includes pack version, compatibility result, matched classifier labels, matched rule IDs, decision effect, severity or risk level, reason, and fixture identity.
 - Release metadata must be sufficient for control9 to reject incompatible packs and for evidence records to identify the policy content used for a decision.
 - This repo defines the reusable decision evidence content consumed by control9: pack identity and version, matched rule metadata, matched classifier labels, decision effect, severity or risk, reason, risk summary, relevant change types, evidence references, fixture references, and parser limitations when present.

@@ -7,6 +7,7 @@ This doc describes how the repo executes its main work at runtime.
 - Packs execute through tests and the SaaS policy engine, not the public integration.
 - The same input envelope produces the same policy result in fixture tests and live evaluation.
 - Local fixture execution loads a pinned pack version, validates manifest compatibility, runs semantic classifiers, evaluates baseline rules, and emits deterministic matched classifier labels and rule IDs.
+- Manifest compatibility validation fails closed when required compatibility metadata is missing, malformed, outside the SaaS policy-engine version range under test, or points at missing artifact or fixture references.
 - Fixture and live evaluation results emit the same explainable decision content: pack version, matched rule, product decision, severity or risk, reason, risk summary, relevant change types, evidence references, and fixture identity when applicable.
 - Shadow-mode and enforce-mode fixture pairs reuse the same input envelope, pack version, classifier execution, and baseline policy evaluation. Their matched classifier labels, matched rule IDs, product decision, severity or risk, reason, risk summary, relevant change types, evidence references, parser limitations, and deterministic ordering must match; only the product response surface may differ between observing a result and acting on it.
 - Classifier execution order is stable across runs. Output sorting is deterministic by severity or risk, decision effect, rule ID, classifier label, and resource identity so fixture reports do not flap.
