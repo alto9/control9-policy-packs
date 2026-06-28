@@ -15,6 +15,7 @@ This doc describes boundary shapes, redaction expectations, fingerprints, summar
 - Compiled artifacts are referenced by manifest metadata and fixture reports. Human-readable examples remain reviewable without requiring readers to inspect compiled output.
 - Classifier fixture files separate source input, expected semantic labels, expected policy result metadata, and fixture notes so reviewer-facing examples can stay readable while machine checks remain deterministic.
 - Fixture expected output includes enough stable identity to compare CDK/CloudFormation and Terraform/OpenTofu results without depending on parser ordering: fixture ID, tool family, normalized resource identity, matched classifier labels, relevant change types, matched rule IDs when policy evaluation is included, decision effect, severity or risk, reason, risk summary, evidence references, and parser limitations when present.
+- Shadow/enforce comparison fixtures serialize the same stable decision fields for each mode and explicitly separate mode-specific response metadata from the shared semantic result, so equality checks can prove the policy result is unchanged while the product response changes.
 
 ## Open implementation decisions
 
