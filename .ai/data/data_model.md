@@ -6,6 +6,7 @@ This doc describes durable and transient data concepts without freezing physical
 
 - Pack data includes readable policy documents, compiled artifacts, classifier metadata, fixture examples, version manifests, and compatibility metadata.
 - Every decision carries enough policy metadata to explain the pack version, matched rule, risk summary, reason, and fixture coverage.
+- A reusable decision record represents pack identity and version, manifest compatibility status, matched rule metadata, classifier labels, decision effect, severity or risk, risk summary, reason text, relevant change types, evidence references, redaction defaults, and fixture references.
 - A pack manifest represents pack identity, semantic version, release status, SaaS policy-engine compatibility range, policy document references, compiled artifact references, fixture suite references, and provenance.
 - Manifest data is reusable product content. It does not store tenant enablement, tenant overrides, customer approver groups, or customer-specific exception settings.
 - Baseline examples are organized around supported inputs and policy meanings: CDK/CloudFormation, Terraform/OpenTofu, pipeline metadata, deploy fingerprints, and cloud audit/off-path signals.
@@ -13,4 +14,4 @@ This doc describes durable and transient data concepts without freezing physical
 
 ## Open implementation decisions
 
-No unresolved implementation decisions remain here for issue #2. Exact physical file names can be chosen during implementation if they preserve the manifest responsibilities above.
+No unresolved implementation decisions remain here for baseline pack manifest and decision data. Exact physical file names can be chosen during implementation if they preserve the responsibilities above.
