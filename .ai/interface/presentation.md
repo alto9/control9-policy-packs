@@ -13,6 +13,8 @@ This doc describes how information is presented and distinguished for users.
 - Examples are grouped by policy meaning and supported tool family so reviewers can trace a baseline risk from input summary to classifier label, matched rule, and expected decision.
 - Fixture reports should be readable as review artifacts: they include pack version, fixture identity, matched rules, classifier labels, decision effect, severity or risk, and pass/fail status.
 - Managed-control pack documentation is generated or maintained from the same source concepts used by manifests and fixtures so docs do not drift from released policy content.
+- Classifier fixture reports group results by tool family, semantic label, and pass/fail status. A failed fixture names the expected and actual classifier labels or decision metadata without dumping raw IaC payloads.
+- Reviewable fixture examples should make the policy meaning clear in plain language before showing machine-oriented expected output.
 
 ## Open implementation decisions
 

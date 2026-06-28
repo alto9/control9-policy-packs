@@ -11,6 +11,9 @@ This doc describes how the repo executes its main work at runtime.
 - Classifier execution order is stable across runs. Output sorting is deterministic by severity or risk, decision effect, rule ID, classifier label, and resource identity so fixture reports do not flap.
 - SaaS evaluation pins an explicit policy-pack version and rejects incompatible pack metadata instead of silently falling back to another version.
 - Fixture expectations cover supported CDK/CloudFormation and Terraform/OpenTofu inputs, deploy verification fingerprints, unapproved pipeline sources, secrets hints, cost threshold signals, and off-path cloud audit findings.
+- CDK/CloudFormation classifier fixtures cover synthesized template input, template or stack diff input, stack or template identity, logical resource identity, resource actions, IAM policy expansion, new role and cross-account principal signals, destructive operations, network boundary changes, template fingerprints, and parser limitations when present.
+- Terraform/OpenTofu classifier fixtures cover plan JSON input, workspace or environment identity, resource address, provider metadata, action sequence, IAM and network deltas, destructive operations, secrets exposure hints, cost threshold signals, plan fingerprints, and parser limitations when present.
+- Fixture cases are organized by supported tool family and semantic classifier label. Each fixture declares the input envelope, expected classifier labels, expected rule or decision metadata, and fixture identity needed to reproduce the result.
 
 ## Open implementation decisions
 
