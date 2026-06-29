@@ -39,6 +39,7 @@ spec:
       changeTypes: ["resource-create", "resource-update", "resource-destroy"]
       reason: "Low-risk development infrastructure changes stay fast."
       reasonPattern: "Low-risk {environment} {tool} change with {changeRisk} risk."
+      riskSummary: "Routine development change with low blast radius and no production authority expansion."
 
     - id: require-approval-prod-mutation
       category: production-mutation
@@ -53,6 +54,7 @@ spec:
       approvalTtl: 4h
       reason: "Production infrastructure mutation changes live systems and needs human review."
       reasonPattern: "Production mutation ({changeTypes}) in {environment} requires approval."
+      riskSummary: "Changes live production resources; a mistaken apply could cause outage or data loss."
 
     - id: require-approval-prod-iam-expansion
       category: iam-expansion
@@ -66,6 +68,7 @@ spec:
       approvalTtl: 4h
       reason: "Production IAM expansion increases authority and needs human review."
       reasonPattern: "Production IAM expansion ({changeTypes}) requires approval."
+      riskSummary: "Expands who can perform actions in the account and increases privilege escalation risk."
 
     - id: require-approval-prod-new-role
       category: new-role
@@ -79,6 +82,7 @@ spec:
       approvalTtl: 4h
       reason: "New or materially changed production roles change who can act in the account."
       reasonPattern: "Production role change ({changeTypes}) requires approval."
+      riskSummary: "Introduces or changes production role identities and trust relationships."
 
     - id: require-approval-prod-cross-account-access
       category: cross-account-access
@@ -92,6 +96,7 @@ spec:
       approvalTtl: 4h
       reason: "Cross-account access expands blast radius across account boundaries."
       reasonPattern: "Production cross-account access ({changeTypes}) requires approval."
+      riskSummary: "Grants cross-account access and expands blast radius beyond a single account boundary."
 
     - id: deny-prod-destructive-change
       category: destructive-change
@@ -108,6 +113,7 @@ spec:
       riskLevel: critical
       reason: "Destructive production changes require an approved break-glass path."
       reasonPattern: "Destructive production change ({changeTypes}) is denied without break-glass."
+      riskSummary: "Irreversible or highly disruptive production deletion without an approved break-glass path."
 
     - id: require-approval-prod-destructive-break-glass
       category: destructive-change
@@ -126,6 +132,7 @@ spec:
       approvalTtl: 1h
       reason: "Destructive production change submitted under break-glass requires explicit approval."
       reasonPattern: "Break-glass destructive change ({changeTypes}) requires approval before proceed."
+      riskSummary: "Destructive production change under break-glass still needs explicit human approval before proceed."
 
     - id: require-approval-prod-network-boundary-change
       category: network-boundary
@@ -145,6 +152,7 @@ spec:
       approvalTtl: 4h
       reason: "Production network boundary changes can expose internal systems."
       reasonPattern: "Production network boundary change ({changeTypes}) requires approval."
+      riskSummary: "Network boundary changes can expose internal systems to broader ingress or routing risk."
 
     - id: require-approval-secrets-exposure-hint
       category: secrets-exposure-hint
@@ -161,6 +169,7 @@ spec:
       approvalTtl: 4h
       reason: "Possible secret material appeared in plan, template, diff, or command output."
       reasonPattern: "Secrets exposure hint ({changeTypes}) requires review before proceed."
+      riskSummary: "Possible secret material in artifacts; review before proceed to avoid credential leakage."
 
     - id: require-approval-unapproved-pipeline-source
       category: unapproved-pipeline-source
@@ -173,6 +182,7 @@ spec:
       approvalTtl: 4h
       reason: "An untrusted pipeline source requested deploy authority."
       reasonPattern: "Unapproved pipeline source ({changeTypes}) requires approval."
+      riskSummary: "Untrusted pipeline source requested deploy authority; supply-chain risk needs review."
 
     - id: observe-cost-threshold-breach
       category: cost-threshold
@@ -183,6 +193,7 @@ spec:
       riskLevel: medium
       reason: "Estimated cost impact exceeded the configured threshold for this change."
       reasonPattern: "Cost threshold signal ({changeTypes}) recorded for review."
+      riskSummary: "Estimated cost or budget threshold exceeded; recorded for finance and platform review."
 
     - id: require-approval-deploy-verification-mismatch
       category: deploy-verification-mismatch
@@ -195,6 +206,7 @@ spec:
       approvalTtl: 2h
       reason: "Deploy artifact or plan fingerprint changed after the prior approval."
       reasonPattern: "Deploy verification mismatch ({changeTypes}) requires re-approval."
+      riskSummary: "Approved artifact no longer matches the deploy target; possible tampering or drift."
 
     - id: observe-off-path-cloud-mutation
       category: off-path-finding
@@ -205,3 +217,4 @@ spec:
       riskLevel: high
       reason: "Cloud mutation occurred without a matching Control9 decision on record."
       reasonPattern: "Off-path finding ({changeTypes}) recorded for evidence timeline review."
+      riskSummary: "Cloud change without a matching Control9 decision; potential unapproved path mutation."

@@ -1,0 +1,45 @@
+{
+  "decisionRecordSchemaVersion": "alto9.io/policy-decision-record/v1alpha1",
+  "packName": "production-infra-baseline",
+  "packVersion": "0.1.0",
+  "fixtureId": "cf-cloudformation-prod-destructive",
+  "toolFamily": "cloudformation",
+  "matchedRules": [
+    {
+      "ruleId": "deny-prod-destructive-change",
+      "category": "destructive-change",
+      "decision": "deny",
+      "severity": "critical",
+      "riskLevel": "critical",
+      "reason": "Destructive production changes require an approved break-glass path.",
+      "riskSummary": "Irreversible or highly disruptive production deletion without an approved break-glass path.",
+      "changeTypes": [
+        "resource-destroy"
+      ],
+      "classifierLabels": [
+        "resource-destroy"
+      ],
+      "resourceIdentity": "LegacyDatabase",
+      "evidenceReferences": [
+        {
+          "kind": "envelope",
+          "path": "inputs/cloudformation/prod-destructive-envelope.json"
+        },
+        {
+          "kind": "artifact",
+          "path": "inputs/cloudformation/prod-destructive-change-set.json"
+        },
+        {
+          "kind": "policyDocument",
+          "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385",
+          "ruleId": "deny-prod-destructive-change"
+        },
+        {
+          "kind": "fixtureCase",
+          "path": "classifier-cases.json#cf-cloudformation-prod-destructive"
+        }
+      ]
+    }
+  ],
+  "parserLimitations": []
+}

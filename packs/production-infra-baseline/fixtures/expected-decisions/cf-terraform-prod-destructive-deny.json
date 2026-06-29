@@ -1,0 +1,45 @@
+{
+  "decisionRecordSchemaVersion": "alto9.io/policy-decision-record/v1alpha1",
+  "packName": "production-infra-baseline",
+  "packVersion": "0.1.0",
+  "fixtureId": "cf-terraform-prod-destructive-deny",
+  "toolFamily": "terraform",
+  "matchedRules": [
+    {
+      "ruleId": "deny-prod-destructive-change",
+      "category": "destructive-change",
+      "decision": "deny",
+      "severity": "critical",
+      "riskLevel": "critical",
+      "reason": "Destructive production changes require an approved break-glass path.",
+      "riskSummary": "Irreversible or highly disruptive production deletion without an approved break-glass path.",
+      "changeTypes": [
+        "database-delete"
+      ],
+      "classifierLabels": [
+        "database-delete"
+      ],
+      "resourceIdentity": "aws_rds_cluster.legacy",
+      "evidenceReferences": [
+        {
+          "kind": "envelope",
+          "path": "inputs/terraform/prod-destructive-envelope.json"
+        },
+        {
+          "kind": "artifact",
+          "path": "inputs/terraform/prod-destructive-plan.json"
+        },
+        {
+          "kind": "policyDocument",
+          "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385",
+          "ruleId": "deny-prod-destructive-change"
+        },
+        {
+          "kind": "fixtureCase",
+          "path": "classifier-cases.json#cf-terraform-prod-destructive-deny"
+        }
+      ]
+    }
+  ],
+  "parserLimitations": []
+}

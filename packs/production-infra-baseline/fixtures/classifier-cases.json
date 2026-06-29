@@ -5,9 +5,25 @@
   "description": "Deterministic classifier input fixtures and expected semantic labels for baseline production infrastructure risks.",
   "outputOrdering": {
     "description": "Matched classifier labels and rule IDs sort by severity rank, decision rank, ruleId, classifierLabel, then resourceIdentity (all ascending).",
-    "sortKeys": ["severityRank", "decisionRank", "ruleId", "classifierLabel", "resourceIdentity"],
-    "severityRank": { "critical": 0, "high": 1, "medium": 2, "low": 3 },
-    "decisionRank": { "deny": 0, "require_approval": 1, "observe": 2, "allow": 3 }
+    "sortKeys": [
+      "severityRank",
+      "decisionRank",
+      "ruleId",
+      "classifierLabel",
+      "resourceIdentity"
+    ],
+    "severityRank": {
+      "critical": 0,
+      "high": 1,
+      "medium": 2,
+      "low": 3
+    },
+    "decisionRank": {
+      "deny": 0,
+      "require_approval": 1,
+      "observe": 2,
+      "allow": 3
+    }
   },
   "cases": [
     {
@@ -20,19 +36,48 @@
         "artifactPath": "inputs/terraform/dev-low-risk-plan.json"
       },
       "expected": {
-        "classifierLabels": ["resource-create"],
-        "changeTypes": ["resource-create"],
-        "resourceIdentities": ["aws_s3_bucket.dev_logs"],
+        "classifierLabels": [
+          "resource-create"
+        ],
+        "changeTypes": [
+          "resource-create"
+        ],
+        "resourceIdentities": [
+          "aws_s3_bucket.dev_logs"
+        ],
         "matchedRules": [
           {
             "ruleId": "allow-low-risk-dev-iac",
             "decision": "allow",
             "severity": "low",
             "classifierLabel": "resource-create",
-            "resourceIdentity": "aws_s3_bucket.dev_logs"
+            "resourceIdentity": "aws_s3_bucket.dev_logs",
+            "reason": "Low-risk development infrastructure changes stay fast.",
+            "riskSummary": "Routine development change with low blast radius and no production authority expansion.",
+            "changeTypes": [
+              "resource-create"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/terraform/dev-low-risk-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/terraform/dev-low-risk-plan.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -45,19 +90,48 @@
         "artifactPath": "inputs/terraform/prod-mutation-plan.json"
       },
       "expected": {
-        "classifierLabels": ["resource-update"],
-        "changeTypes": ["resource-update"],
-        "resourceIdentities": ["aws_s3_bucket.prod_app"],
+        "classifierLabels": [
+          "resource-update"
+        ],
+        "changeTypes": [
+          "resource-update"
+        ],
+        "resourceIdentities": [
+          "aws_s3_bucket.prod_app"
+        ],
         "matchedRules": [
           {
             "ruleId": "require-approval-prod-mutation",
             "decision": "require_approval",
             "severity": "medium",
             "classifierLabel": "resource-update",
-            "resourceIdentity": "aws_s3_bucket.prod_app"
+            "resourceIdentity": "aws_s3_bucket.prod_app",
+            "reason": "Production infrastructure mutation changes live systems and needs human review.",
+            "riskSummary": "Changes live production resources; a mistaken apply could cause outage or data loss.",
+            "changeTypes": [
+              "resource-update"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/terraform/prod-mutation-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/terraform/prod-mutation-plan.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -70,19 +144,48 @@
         "artifactPath": "inputs/opentofu/opentofu-prod-mutation-plan.json"
       },
       "expected": {
-        "classifierLabels": ["resource-create"],
-        "changeTypes": ["resource-create"],
-        "resourceIdentities": ["aws_dynamodb_table.sessions"],
+        "classifierLabels": [
+          "resource-create"
+        ],
+        "changeTypes": [
+          "resource-create"
+        ],
+        "resourceIdentities": [
+          "aws_dynamodb_table.sessions"
+        ],
         "matchedRules": [
           {
             "ruleId": "require-approval-prod-mutation",
             "decision": "require_approval",
             "severity": "medium",
             "classifierLabel": "resource-create",
-            "resourceIdentity": "aws_dynamodb_table.sessions"
+            "resourceIdentity": "aws_dynamodb_table.sessions",
+            "reason": "Production infrastructure mutation changes live systems and needs human review.",
+            "riskSummary": "Changes live production resources; a mistaken apply could cause outage or data loss.",
+            "changeTypes": [
+              "resource-create"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/opentofu/prod-mutation-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/opentofu/opentofu-prod-mutation-plan.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -95,19 +198,48 @@
         "artifactPath": "inputs/terraform/prod-iam-expansion-plan.json"
       },
       "expected": {
-        "classifierLabels": ["iam-policy-expanded"],
-        "changeTypes": ["iam-policy-expanded"],
-        "resourceIdentities": ["aws_iam_role_policy.prod_app"],
+        "classifierLabels": [
+          "iam-policy-expanded"
+        ],
+        "changeTypes": [
+          "iam-policy-expanded"
+        ],
+        "resourceIdentities": [
+          "aws_iam_role_policy.prod_app"
+        ],
         "matchedRules": [
           {
             "ruleId": "require-approval-prod-iam-expansion",
             "decision": "require_approval",
             "severity": "high",
             "classifierLabel": "iam-policy-expanded",
-            "resourceIdentity": "aws_iam_role_policy.prod_app"
+            "resourceIdentity": "aws_iam_role_policy.prod_app",
+            "reason": "Production IAM expansion increases authority and needs human review.",
+            "riskSummary": "Expands who can perform actions in the account and increases privilege escalation risk.",
+            "changeTypes": [
+              "iam-policy-expanded"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/terraform/prod-iam-expansion-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/terraform/prod-iam-expansion-plan.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -120,19 +252,48 @@
         "artifactPath": "inputs/terraform/prod-new-role-plan.json"
       },
       "expected": {
-        "classifierLabels": ["new-role"],
-        "changeTypes": ["new-role"],
-        "resourceIdentities": ["aws_iam_role.batch_worker"],
+        "classifierLabels": [
+          "new-role"
+        ],
+        "changeTypes": [
+          "new-role"
+        ],
+        "resourceIdentities": [
+          "aws_iam_role.batch_worker"
+        ],
         "matchedRules": [
           {
             "ruleId": "require-approval-prod-new-role",
             "decision": "require_approval",
             "severity": "high",
             "classifierLabel": "new-role",
-            "resourceIdentity": "aws_iam_role.batch_worker"
+            "resourceIdentity": "aws_iam_role.batch_worker",
+            "reason": "New or materially changed production roles change who can act in the account.",
+            "riskSummary": "Introduces or changes production role identities and trust relationships.",
+            "changeTypes": [
+              "new-role"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/terraform/prod-new-role-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/terraform/prod-new-role-plan.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -145,19 +306,48 @@
         "artifactPath": "inputs/cdk/prod-iam-role-template.json"
       },
       "expected": {
-        "classifierLabels": ["new-role"],
-        "changeTypes": ["new-role"],
-        "resourceIdentities": ["BatchWorkerRole"],
+        "classifierLabels": [
+          "new-role"
+        ],
+        "changeTypes": [
+          "new-role"
+        ],
+        "resourceIdentities": [
+          "BatchWorkerRole"
+        ],
         "matchedRules": [
           {
             "ruleId": "require-approval-prod-new-role",
             "decision": "require_approval",
             "severity": "high",
             "classifierLabel": "new-role",
-            "resourceIdentity": "BatchWorkerRole"
+            "resourceIdentity": "BatchWorkerRole",
+            "reason": "New or materially changed production roles change who can act in the account.",
+            "riskSummary": "Introduces or changes production role identities and trust relationships.",
+            "changeTypes": [
+              "new-role"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/cdk/prod-new-role-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/cdk/prod-iam-role-template.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -170,19 +360,48 @@
         "artifactPath": "inputs/terraform/prod-cross-account-plan.json"
       },
       "expected": {
-        "classifierLabels": ["cross-account-access"],
-        "changeTypes": ["cross-account-access"],
-        "resourceIdentities": ["aws_s3_bucket_policy.shared_data"],
+        "classifierLabels": [
+          "cross-account-access"
+        ],
+        "changeTypes": [
+          "cross-account-access"
+        ],
+        "resourceIdentities": [
+          "aws_s3_bucket_policy.shared_data"
+        ],
         "matchedRules": [
           {
             "ruleId": "require-approval-prod-cross-account-access",
             "decision": "require_approval",
             "severity": "critical",
             "classifierLabel": "cross-account-access",
-            "resourceIdentity": "aws_s3_bucket_policy.shared_data"
+            "resourceIdentity": "aws_s3_bucket_policy.shared_data",
+            "reason": "Cross-account access expands blast radius across account boundaries.",
+            "riskSummary": "Grants cross-account access and expands blast radius beyond a single account boundary.",
+            "changeTypes": [
+              "cross-account-access"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/terraform/prod-cross-account-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/terraform/prod-cross-account-plan.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -195,19 +414,48 @@
         "artifactPath": "inputs/terraform/prod-destructive-plan.json"
       },
       "expected": {
-        "classifierLabels": ["database-delete"],
-        "changeTypes": ["database-delete"],
-        "resourceIdentities": ["aws_rds_cluster.legacy"],
+        "classifierLabels": [
+          "database-delete"
+        ],
+        "changeTypes": [
+          "database-delete"
+        ],
+        "resourceIdentities": [
+          "aws_rds_cluster.legacy"
+        ],
         "matchedRules": [
           {
             "ruleId": "deny-prod-destructive-change",
             "decision": "deny",
             "severity": "critical",
             "classifierLabel": "database-delete",
-            "resourceIdentity": "aws_rds_cluster.legacy"
+            "resourceIdentity": "aws_rds_cluster.legacy",
+            "reason": "Destructive production changes require an approved break-glass path.",
+            "riskSummary": "Irreversible or highly disruptive production deletion without an approved break-glass path.",
+            "changeTypes": [
+              "database-delete"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/terraform/prod-destructive-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/terraform/prod-destructive-plan.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -220,19 +468,48 @@
         "artifactPath": "inputs/terraform/prod-destructive-plan.json"
       },
       "expected": {
-        "classifierLabels": ["database-delete"],
-        "changeTypes": ["database-delete"],
-        "resourceIdentities": ["aws_rds_cluster.legacy"],
+        "classifierLabels": [
+          "database-delete"
+        ],
+        "changeTypes": [
+          "database-delete"
+        ],
+        "resourceIdentities": [
+          "aws_rds_cluster.legacy"
+        ],
         "matchedRules": [
           {
             "ruleId": "require-approval-prod-destructive-break-glass",
             "decision": "require_approval",
             "severity": "critical",
             "classifierLabel": "database-delete",
-            "resourceIdentity": "aws_rds_cluster.legacy"
+            "resourceIdentity": "aws_rds_cluster.legacy",
+            "reason": "Destructive production change submitted under break-glass requires explicit approval.",
+            "riskSummary": "Destructive production change under break-glass still needs explicit human approval before proceed.",
+            "changeTypes": [
+              "database-delete"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/terraform/prod-destructive-break-glass-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/terraform/prod-destructive-plan.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -245,19 +522,48 @@
         "artifactPath": "inputs/cloudformation/prod-destructive-change-set.json"
       },
       "expected": {
-        "classifierLabels": ["resource-destroy"],
-        "changeTypes": ["resource-destroy"],
-        "resourceIdentities": ["LegacyDatabase"],
+        "classifierLabels": [
+          "resource-destroy"
+        ],
+        "changeTypes": [
+          "resource-destroy"
+        ],
+        "resourceIdentities": [
+          "LegacyDatabase"
+        ],
         "matchedRules": [
           {
             "ruleId": "deny-prod-destructive-change",
             "decision": "deny",
             "severity": "critical",
             "classifierLabel": "resource-destroy",
-            "resourceIdentity": "LegacyDatabase"
+            "resourceIdentity": "LegacyDatabase",
+            "reason": "Destructive production changes require an approved break-glass path.",
+            "riskSummary": "Irreversible or highly disruptive production deletion without an approved break-glass path.",
+            "changeTypes": [
+              "resource-destroy"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/cloudformation/prod-destructive-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/cloudformation/prod-destructive-change-set.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -270,19 +576,48 @@
         "artifactPath": "inputs/terraform/prod-network-boundary-plan.json"
       },
       "expected": {
-        "classifierLabels": ["security-group-ingress-expanded"],
-        "changeTypes": ["security-group-ingress-expanded"],
-        "resourceIdentities": ["aws_security_group.web"],
+        "classifierLabels": [
+          "security-group-ingress-expanded"
+        ],
+        "changeTypes": [
+          "security-group-ingress-expanded"
+        ],
+        "resourceIdentities": [
+          "aws_security_group.web"
+        ],
         "matchedRules": [
           {
             "ruleId": "require-approval-prod-network-boundary-change",
             "decision": "require_approval",
             "severity": "high",
             "classifierLabel": "security-group-ingress-expanded",
-            "resourceIdentity": "aws_security_group.web"
+            "resourceIdentity": "aws_security_group.web",
+            "reason": "Production network boundary changes can expose internal systems.",
+            "riskSummary": "Network boundary changes can expose internal systems to broader ingress or routing risk.",
+            "changeTypes": [
+              "security-group-ingress-expanded"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/terraform/prod-network-boundary-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/terraform/prod-network-boundary-plan.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -295,19 +630,48 @@
         "artifactPath": "inputs/terraform/secrets-hint-plan.json"
       },
       "expected": {
-        "classifierLabels": ["secret-value-in-plan"],
-        "changeTypes": ["secret-value-in-plan"],
-        "resourceIdentities": ["aws_secretsmanager_secret_version.app"],
+        "classifierLabels": [
+          "secret-value-in-plan"
+        ],
+        "changeTypes": [
+          "secret-value-in-plan"
+        ],
+        "resourceIdentities": [
+          "aws_secretsmanager_secret_version.app"
+        ],
         "matchedRules": [
           {
             "ruleId": "require-approval-secrets-exposure-hint",
             "decision": "require_approval",
             "severity": "high",
             "classifierLabel": "secret-value-in-plan",
-            "resourceIdentity": "aws_secretsmanager_secret_version.app"
+            "resourceIdentity": "aws_secretsmanager_secret_version.app",
+            "reason": "Possible secret material appeared in plan, template, diff, or command output.",
+            "riskSummary": "Possible secret material in artifacts; review before proceed to avoid credential leakage.",
+            "changeTypes": [
+              "secret-value-in-plan"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/terraform/secrets-hint-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/terraform/secrets-hint-plan.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -319,19 +683,44 @@
         "envelopePath": "inputs/pipeline/unapproved-source-envelope.json"
       },
       "expected": {
-        "classifierLabels": ["untrusted-pipeline-source"],
-        "changeTypes": ["untrusted-pipeline-source"],
-        "resourceIdentities": ["acme/example-app:deploy-prod.yml"],
+        "classifierLabels": [
+          "untrusted-pipeline-source"
+        ],
+        "changeTypes": [
+          "untrusted-pipeline-source"
+        ],
+        "resourceIdentities": [
+          "acme/example-app:deploy-prod.yml"
+        ],
         "matchedRules": [
           {
             "ruleId": "require-approval-unapproved-pipeline-source",
             "decision": "require_approval",
             "severity": "high",
             "classifierLabel": "untrusted-pipeline-source",
-            "resourceIdentity": "acme/example-app:deploy-prod.yml"
+            "resourceIdentity": "acme/example-app:deploy-prod.yml",
+            "reason": "An untrusted pipeline source requested deploy authority.",
+            "riskSummary": "Untrusted pipeline source requested deploy authority; supply-chain risk needs review.",
+            "changeTypes": [
+              "untrusted-pipeline-source"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/pipeline/unapproved-source-envelope.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -344,19 +733,48 @@
         "artifactPath": "inputs/terraform/cost-threshold-plan.json"
       },
       "expected": {
-        "classifierLabels": ["budget-threshold-exceeded"],
-        "changeTypes": ["budget-threshold-exceeded"],
-        "resourceIdentities": ["aws_instance.analytics"],
+        "classifierLabels": [
+          "budget-threshold-exceeded"
+        ],
+        "changeTypes": [
+          "budget-threshold-exceeded"
+        ],
+        "resourceIdentities": [
+          "aws_instance.analytics"
+        ],
         "matchedRules": [
           {
             "ruleId": "observe-cost-threshold-breach",
             "decision": "observe",
             "severity": "medium",
             "classifierLabel": "budget-threshold-exceeded",
-            "resourceIdentity": "aws_instance.analytics"
+            "resourceIdentity": "aws_instance.analytics",
+            "reason": "Estimated cost impact exceeded the configured threshold for this change.",
+            "riskSummary": "Estimated cost or budget threshold exceeded; recorded for finance and platform review.",
+            "changeTypes": [
+              "budget-threshold-exceeded"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/terraform/cost-threshold-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/terraform/cost-threshold-plan.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -369,26 +787,62 @@
         "artifactPath": "inputs/terraform/prod-mutation-plan.json"
       },
       "expected": {
-        "classifierLabels": ["plan-fingerprint-mismatch", "resource-update"],
-        "changeTypes": ["plan-fingerprint-mismatch", "resource-update"],
-        "resourceIdentities": ["aws_s3_bucket.prod_app"],
+        "classifierLabels": [
+          "plan-fingerprint-mismatch",
+          "resource-update"
+        ],
+        "changeTypes": [
+          "plan-fingerprint-mismatch",
+          "resource-update"
+        ],
+        "resourceIdentities": [
+          "aws_s3_bucket.prod_app"
+        ],
         "matchedRules": [
           {
             "ruleId": "require-approval-deploy-verification-mismatch",
             "decision": "require_approval",
             "severity": "high",
             "classifierLabel": "plan-fingerprint-mismatch",
-            "resourceIdentity": "aws_s3_bucket.prod_app"
+            "resourceIdentity": "aws_s3_bucket.prod_app",
+            "reason": "Deploy artifact or plan fingerprint changed after the prior approval.",
+            "riskSummary": "Approved artifact no longer matches the deploy target; possible tampering or drift.",
+            "changeTypes": [
+              "plan-fingerprint-mismatch"
+            ]
           },
           {
             "ruleId": "require-approval-prod-mutation",
             "decision": "require_approval",
             "severity": "medium",
             "classifierLabel": "resource-update",
-            "resourceIdentity": "aws_s3_bucket.prod_app"
+            "resourceIdentity": "aws_s3_bucket.prod_app",
+            "reason": "Production infrastructure mutation changes live systems and needs human review.",
+            "riskSummary": "Changes live production resources; a mistaken apply could cause outage or data loss.",
+            "changeTypes": [
+              "resource-update"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/terraform/deploy-fingerprint-mismatch-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/terraform/prod-mutation-plan.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -400,19 +854,44 @@
         "envelopePath": "inputs/cloud-audit/off-path-mutation-envelope.json"
       },
       "expected": {
-        "classifierLabels": ["off-path-cloud-mutation"],
-        "changeTypes": ["off-path-cloud-mutation"],
-        "resourceIdentities": ["arn:aws:s3:::prod-shared-data"],
+        "classifierLabels": [
+          "off-path-cloud-mutation"
+        ],
+        "changeTypes": [
+          "off-path-cloud-mutation"
+        ],
+        "resourceIdentities": [
+          "arn:aws:s3:::prod-shared-data"
+        ],
         "matchedRules": [
           {
             "ruleId": "observe-off-path-cloud-mutation",
             "decision": "observe",
             "severity": "high",
             "classifierLabel": "off-path-cloud-mutation",
-            "resourceIdentity": "arn:aws:s3:::prod-shared-data"
+            "resourceIdentity": "arn:aws:s3:::prod-shared-data",
+            "reason": "Cloud mutation occurred without a matching Control9 decision on record.",
+            "riskSummary": "Cloud change without a matching Control9 decision; potential unapproved path mutation.",
+            "changeTypes": [
+              "off-path-cloud-mutation"
+            ]
           }
         ],
-        "parserLimitations": []
+        "parserLimitations": [],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/cloud-audit/off-path-mutation-envelope.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     }
   ],
@@ -426,19 +905,52 @@
         "artifactPath": "inputs/edge-cases/unknown-resource-plan.json"
       },
       "expected": {
-        "classifierLabels": ["parser-limitation:unknown-resource-type", "resource-update"],
-        "changeTypes": ["resource-update"],
-        "resourceIdentities": ["aws_s3_bucket.known_sidecar", "vendor_unknown_resource.custom_thing"],
+        "classifierLabels": [
+          "parser-limitation:unknown-resource-type",
+          "resource-update"
+        ],
+        "changeTypes": [
+          "resource-update"
+        ],
+        "resourceIdentities": [
+          "aws_s3_bucket.known_sidecar",
+          "vendor_unknown_resource.custom_thing"
+        ],
         "matchedRules": [
           {
             "ruleId": "require-approval-prod-mutation",
             "decision": "require_approval",
             "severity": "medium",
             "classifierLabel": "resource-update",
-            "resourceIdentity": "aws_s3_bucket.known_sidecar"
+            "resourceIdentity": "aws_s3_bucket.known_sidecar",
+            "reason": "Production infrastructure mutation changes live systems and needs human review.",
+            "riskSummary": "Changes live production resources; a mistaken apply could cause outage or data loss.",
+            "changeTypes": [
+              "resource-update"
+            ]
           }
         ],
-        "parserLimitations": ["unknown-resource-type"]
+        "parserLimitations": [
+          "unknown-resource-type"
+        ],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/edge-cases/unknown-resource-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/edge-cases/unknown-resource-plan.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -450,7 +962,9 @@
         "artifactPath": "inputs/edge-cases/malformed-plan.json"
       },
       "expected": {
-        "classifierLabels": ["parser-limitation:parse-error"],
+        "classifierLabels": [
+          "parser-limitation:parse-error"
+        ],
         "changeTypes": [],
         "resourceIdentities": [],
         "matchedRules": [
@@ -459,10 +973,33 @@
             "decision": "require_approval",
             "severity": "medium",
             "classifierLabel": "parser-limitation:parse-error",
-            "resourceIdentity": ""
+            "resourceIdentity": "",
+            "reason": "Production infrastructure mutation changes live systems and needs human review.",
+            "riskSummary": "Changes live production resources; a mistaken apply could cause outage or data loss.",
+            "changeTypes": []
           }
         ],
-        "parserLimitations": ["parse-error"]
+        "parserLimitations": [
+          "parse-error"
+        ],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/edge-cases/parser-error-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/edge-cases/malformed-plan.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -473,7 +1010,9 @@
         "envelopePath": "inputs/edge-cases/unsupported-tool-envelope.json"
       },
       "expected": {
-        "classifierLabels": ["parser-limitation:unsupported-tool"],
+        "classifierLabels": [
+          "parser-limitation:unsupported-tool"
+        ],
         "changeTypes": [],
         "resourceIdentities": [],
         "matchedRules": [
@@ -482,10 +1021,29 @@
             "decision": "observe",
             "severity": "high",
             "classifierLabel": "parser-limitation:unsupported-tool",
-            "resourceIdentity": ""
+            "resourceIdentity": "",
+            "reason": "Cloud mutation occurred without a matching Control9 decision on record.",
+            "riskSummary": "Cloud change without a matching Control9 decision; potential unapproved path mutation.",
+            "changeTypes": []
           }
         ],
-        "parserLimitations": ["unsupported-tool"]
+        "parserLimitations": [
+          "unsupported-tool"
+        ],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/edge-cases/unsupported-tool-envelope.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     },
     {
@@ -497,19 +1055,51 @@
         "artifactPath": "inputs/cloudformation/partial-change-set-summary.json"
       },
       "expected": {
-        "classifierLabels": ["parser-limitation:partial-summary", "security-group-ingress-expanded"],
-        "changeTypes": ["security-group-ingress-expanded"],
-        "resourceIdentities": ["WebSecurityGroup"],
+        "classifierLabels": [
+          "parser-limitation:partial-summary",
+          "security-group-ingress-expanded"
+        ],
+        "changeTypes": [
+          "security-group-ingress-expanded"
+        ],
+        "resourceIdentities": [
+          "WebSecurityGroup"
+        ],
         "matchedRules": [
           {
             "ruleId": "require-approval-prod-network-boundary-change",
             "decision": "require_approval",
             "severity": "high",
             "classifierLabel": "security-group-ingress-expanded",
-            "resourceIdentity": "WebSecurityGroup"
+            "resourceIdentity": "WebSecurityGroup",
+            "reason": "Production network boundary changes can expose internal systems.",
+            "riskSummary": "Network boundary changes can expose internal systems to broader ingress or routing risk.",
+            "changeTypes": [
+              "security-group-ingress-expanded"
+            ]
           }
         ],
-        "parserLimitations": ["partial-summary"]
+        "parserLimitations": [
+          "partial-summary"
+        ],
+        "evidenceReferences": [
+          {
+            "kind": "envelope",
+            "path": "inputs/cloudformation/partial-summary-envelope.json"
+          },
+          {
+            "kind": "artifact",
+            "path": "inputs/cloudformation/partial-change-set-summary.json"
+          },
+          {
+            "kind": "policyDocument",
+            "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+          },
+          {
+            "kind": "manifest",
+            "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+          }
+        ]
       }
     }
   ]

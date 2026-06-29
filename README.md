@@ -29,11 +29,13 @@ Every decision should include:
 
 - Policy pack name and version.
 - Matched rule identifier.
-- Decision reason.
-- Risk summary.
-- Relevant change types.
-- Required approver group when approval is needed.
+- Decision reason and risk summary.
+- Relevant change types and matched classifier labels.
+- Evidence references to envelope, artifact, and policy document inputs.
+- Required approver group when approval is needed (approver roles in this repo; tenant mapping in control9).
 - Evidence retention and redaction defaults where applicable.
+
+See [`docs/decision-records.md`](docs/decision-records.md) for the machine-readable decision record schema, redaction expectations, and validation commands.
 
 ## Baseline MVP Pack
 
@@ -132,7 +134,15 @@ Validate a manifest and classifier fixtures locally:
 ```bash
 ./scripts/validate-policy-pack.sh
 python3 scripts/validate-classifier-fixtures.py --report
+python3 scripts/validate-decision-records.py
 ```
+
+Explainable decision records, redaction rules, and golden fixture outputs:
+
+- Decision record guide: `docs/decision-records.md`
+- Schema: `schemas/policy-decision-record.v1alpha1.schema.json`
+- Golden outputs: `packs/production-infra-baseline/fixtures/expected-decisions/`
+- Reviewer example: `examples/decisions/terraform-prod-iam-expansion.json`
 
 Release, CI, contribution, and policy authoring guides:
 

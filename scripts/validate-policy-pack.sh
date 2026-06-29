@@ -12,6 +12,9 @@ python3 scripts/validate-pack-manifest.py "${MANIFEST}"
 echo "==> Validating classifier fixtures"
 python3 scripts/validate-classifier-fixtures.py
 
+echo "==> Validating explainable decision records"
+python3 scripts/validate-decision-records.py
+
 echo "==> Validating docs and examples"
 python3 scripts/validate-docs-examples.py
 

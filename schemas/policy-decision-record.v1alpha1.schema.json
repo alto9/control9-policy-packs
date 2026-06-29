@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://alto9.io/schemas/policy-decision-record/v1alpha1",
+  "title": "Control9 Policy Decision Record",
+  "description": "Reusable decision evidence content produced by baseline policy-pack evaluation. control9 embeds these fields in SaaS decision payloads; tenant configuration, approval routing, and the complete API envelope remain owned by control9.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "decisionRecordSchemaVersion",
+    "packName",
+    "packVersion",
+    "fixtureId",
+    "matchedRules"
+  ],
+  "properties": {
+    "decisionRecordSchemaVersion": {
+      "type": "string",
+      "const": "alto9.io/policy-decision-record/v1alpha1"
+    },
+    "packName": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Policy pack identity from the pack manifest."
+    },
+    "packVersion": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$",
+      "description": "Pinned semantic version of the policy pack used for evaluation."
+    },
+    "fixtureId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable fixture case identifier when the record comes from fixture evaluation."
+    },
+    "toolFamily": {
+      "type": "string",
+      "description": "Supported tool family for the evaluated input (terraform, opentofu, cdk, cloudformation, pipeline, cloud-audit)."
+    },
+    "matchedRules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/matchedRule"
+      }
+    },
+    "parserLimitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Parser limitations that affected classification or policy evaluation."
+    }
+  },
+  "$defs": {
+    "evidenceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "envelope",
+            "artifact",
+            "policyDocument",
+            "manifest",
+            "fixtureCase"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Repository-relative path for envelope, artifact, or fixture inputs."
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "description": "Content digest for policy documents or manifest artifacts."
+        },
+        "ruleId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Matched rule identifier when referencing policy document provenance."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": ["envelope", "artifact", "fixtureCase"]
+              }
+            }
+          },
+          "then": {
+            "required": ["path"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": ["policyDocument", "manifest"]
+              }
+            }
+          },
+          "then": {
+            "required": ["digest"]
+          }
+        }
+      ]
+    },
+    "matchedRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ruleId",
+        "category",
+        "decision",
+        "severity",
+        "riskLevel",
+        "reason",
+        "riskSummary",
+        "changeTypes",
+        "classifierLabels",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "ruleId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision": {
+          "type": "string",
+          "enum": ["allow", "deny", "require_approval", "observe"]
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"]
+        },
+        "riskLevel": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Primary human-readable reason text for SaaS UI, CI feedback, and evidence exports."
+        },
+        "riskSummary": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Plain-language risk summary for platform and security reviewers."
+        },
+        "changeTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "classifierLabels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "resourceIdentity": {
+          "type": "string",
+          "description": "Normalized resource identity when the matched label applies to a specific resource."
+        },
+        "evidenceReferences": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/evidenceReference"
+          }
+        }
+      }
+    }
+  }
+}

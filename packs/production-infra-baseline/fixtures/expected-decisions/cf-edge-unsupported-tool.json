@@ -1,0 +1,43 @@
+{
+  "decisionRecordSchemaVersion": "alto9.io/policy-decision-record/v1alpha1",
+  "packName": "production-infra-baseline",
+  "packVersion": "0.1.0",
+  "fixtureId": "cf-edge-unsupported-tool",
+  "toolFamily": null,
+  "matchedRules": [
+    {
+      "ruleId": "observe-off-path-cloud-mutation",
+      "category": "off-path-finding",
+      "decision": "observe",
+      "severity": "high",
+      "riskLevel": "high",
+      "reason": "Cloud mutation occurred without a matching Control9 decision on record.",
+      "riskSummary": "Cloud change without a matching Control9 decision; potential unapproved path mutation.",
+      "changeTypes": [
+        "off-path-cloud-mutation"
+      ],
+      "classifierLabels": [
+        "parser-limitation:unsupported-tool"
+      ],
+      "resourceIdentity": "",
+      "evidenceReferences": [
+        {
+          "kind": "envelope",
+          "path": "inputs/edge-cases/unsupported-tool-envelope.json"
+        },
+        {
+          "kind": "policyDocument",
+          "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385",
+          "ruleId": "observe-off-path-cloud-mutation"
+        },
+        {
+          "kind": "fixtureCase",
+          "path": "classifier-cases.json#cf-edge-unsupported-tool"
+        }
+      ]
+    }
+  ],
+  "parserLimitations": [
+    "unsupported-tool"
+  ]
+}
