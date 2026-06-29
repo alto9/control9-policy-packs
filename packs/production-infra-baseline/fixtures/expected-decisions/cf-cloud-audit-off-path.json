@@ -1,0 +1,41 @@
+{
+  "decisionRecordSchemaVersion": "alto9.io/policy-decision-record/v1alpha1",
+  "packName": "production-infra-baseline",
+  "packVersion": "0.1.0",
+  "fixtureId": "cf-cloud-audit-off-path",
+  "toolFamily": "cloud-audit",
+  "matchedRules": [
+    {
+      "ruleId": "observe-off-path-cloud-mutation",
+      "category": "off-path-finding",
+      "decision": "observe",
+      "severity": "high",
+      "riskLevel": "high",
+      "reason": "Cloud mutation occurred without a matching Control9 decision on record.",
+      "riskSummary": "Cloud change without a matching Control9 decision; potential unapproved path mutation.",
+      "changeTypes": [
+        "off-path-cloud-mutation"
+      ],
+      "classifierLabels": [
+        "off-path-cloud-mutation"
+      ],
+      "resourceIdentity": "arn:aws:s3:::prod-shared-data",
+      "evidenceReferences": [
+        {
+          "kind": "envelope",
+          "path": "inputs/cloud-audit/off-path-mutation-envelope.json"
+        },
+        {
+          "kind": "policyDocument",
+          "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385",
+          "ruleId": "observe-off-path-cloud-mutation"
+        },
+        {
+          "kind": "fixtureCase",
+          "path": "classifier-cases.json#cf-cloud-audit-off-path"
+        }
+      ]
+    }
+  ],
+  "parserLimitations": []
+}

@@ -29,9 +29,10 @@ The authoritative machine-readable catalog lives in `packs/production-infra-base
 Each rule defines:
 
 - **`reason`**: the default human-readable sentence used in SaaS UI, GitHub/GitLab feedback, and evidence exports.
+- **`riskSummary`**: a plain-language summary of the underlying risk for platform and security reviewers.
 - **`reasonPattern`**: a template with `{placeholders}` the policy engine may fill from classifier output (`environment`, `tool`, `changeTypes`, `changeRisk`, and similar fields).
 
-Reason text must stay understandable without parser internals. Do not embed raw secret values, credentials, or full resource payloads in reasons.
+Reason and risk summary text must stay understandable without parser internals. Do not embed raw secret values, credentials, or full resource payloads in either field.
 
 ## Exception and break-glass semantics
 
@@ -61,6 +62,7 @@ For each matched baseline rule, the pack contributes:
 | `rules[].decision` | Product effect: `allow`, `deny`, `require_approval`, `observe` |
 | `rules[].severity` / `riskLevel` | Severity or risk surfaced to humans and evidence |
 | `rules[].reason` / rendered `reasonPattern` | Primary human-readable reason text |
+| `rules[].riskSummary` | Plain-language risk summary for reviewers and evidence exports |
 | `rules[].changeTypes` | Relevant change types attached to the decision |
 | Classifier labels (from fixtures, issue #10) | Matched classifier labels on the evidence record |
 | Manifest artifact digests | Provenance for which policy document produced the decision |
@@ -71,8 +73,9 @@ control9 wraps those fields with tenant scope, runtime mode, correlation identif
 
 `packs/production-infra-baseline/fixtures/suite.json` indexes one expectation entry per baseline rule ID plus the `classifier-input-fixtures` suite.
 
-Classifier input shapes, example artifacts, deterministic output ordering, and edge-case behavior are documented in `docs/classifier-fixtures.md`. Machine-readable cases live in `packs/production-infra-baseline/fixtures/classifier-cases.json`. Validate locally with:
+Classifier input shapes, example artifacts, deterministic output ordering, edge-case behavior, and golden decision records are documented in `docs/classifier-fixtures.md` and `docs/decision-records.md`. Machine-readable cases live in `packs/production-infra-baseline/fixtures/classifier-cases.json`. Validate locally with:
 
 ```bash
 python3 scripts/validate-classifier-fixtures.py
+python3 scripts/validate-decision-records.py
 ```

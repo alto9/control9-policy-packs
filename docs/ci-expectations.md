@@ -10,6 +10,7 @@ CI runs on pull requests and on pushes to `main`. The workflow lives at [`.githu
 |-------|---------|----------------|
 | Pack manifest validation | `python3 scripts/validate-pack-manifest.py packs/production-infra-baseline/manifest.json` | Manifest schema, semver, release status, compatibility metadata, artifact paths, SHA-256 digests, and absence of tenant-specific fields |
 | Classifier fixture validation | `python3 scripts/validate-classifier-fixtures.py` | Fixture structure, baseline rule coverage, edge-case coverage, deterministic ordering, JSON validity, and forbidden secret patterns |
+| Decision record validation | `python3 scripts/validate-decision-records.py` | Policy rules include reason and risk summary, fixture expectations match policy metadata, golden decision records stay in sync, and decision output excludes tenant-specific fields |
 | Docs and examples validation | `python3 scripts/validate-docs-examples.py` | Required documentation exists, example manifests validate, and reviewer example paths referenced by docs are present |
 | Whitespace hygiene | `git diff --check` | No trailing whitespace or conflict markers in the diff |
 
@@ -41,7 +42,26 @@ Classifier fixture CI enforces:
 - Input envelope and artifact paths resolve to files under the pack fixtures tree
 - Fixtures do not contain live credentials or private key material
 
-When live classifiers are implemented, CI will extend to compare classifier output against fixture expectations. Until then, the fixture contract is the source of truth for expected semantic labels, matched rule IDs, decision metadata, and ordering.
+When live classifiers are implemented, CI will extend to compare classifier output against fixture expectations. Until then, the fixture contract is the source of truth for expected semantic labels, matched rule IDs, decision metadata, reason, risk summary, evidence references, and ordering.
+
+## Decision record validation
+
+Decision record CI enforces:
+
+- Every baseline rule in the policy YAML defines `reason`, `riskSummary`, and applicable `changeTypes`
+- Each classifier fixture case declares expected `reason`, `riskSummary`, `changeTypes`, and case-level `evidenceReferences` on matched rules
+- Golden records under `fixtures/expected-decisions/` match the policy document and fixture inputs
+- Reason and risk summary text do not contain live credential patterns
+- Decision records do not include tenant enablement, approver groups, or customer override state
+
+See [`decision-records.md`](decision-records.md) for the schema and redaction expectations.
+
+Generate or refresh golden decision records locally:
+
+```bash
+python3 scripts/validate-decision-records.py --sync-fixtures --write-expected
+python3 scripts/validate-decision-records.py
+```
 
 Generate a reviewer-readable fixture report locally:
 

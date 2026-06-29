@@ -1,0 +1,45 @@
+{
+  "decisionRecordSchemaVersion": "alto9.io/policy-decision-record/v1alpha1",
+  "packName": "production-infra-baseline",
+  "packVersion": "0.1.0",
+  "fixtureId": "cf-terraform-prod-iam-expansion",
+  "toolFamily": "terraform",
+  "matchedRules": [
+    {
+      "ruleId": "require-approval-prod-iam-expansion",
+      "category": "iam-expansion",
+      "decision": "require_approval",
+      "severity": "high",
+      "riskLevel": "high",
+      "reason": "Production IAM expansion increases authority and needs human review.",
+      "riskSummary": "Expands who can perform actions in the account and increases privilege escalation risk.",
+      "changeTypes": [
+        "iam-policy-expanded"
+      ],
+      "classifierLabels": [
+        "iam-policy-expanded"
+      ],
+      "resourceIdentity": "aws_iam_role_policy.prod_app",
+      "evidenceReferences": [
+        {
+          "kind": "envelope",
+          "path": "inputs/terraform/prod-iam-expansion-envelope.json"
+        },
+        {
+          "kind": "artifact",
+          "path": "inputs/terraform/prod-iam-expansion-plan.json"
+        },
+        {
+          "kind": "policyDocument",
+          "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385",
+          "ruleId": "require-approval-prod-iam-expansion"
+        },
+        {
+          "kind": "fixtureCase",
+          "path": "classifier-cases.json#cf-terraform-prod-iam-expansion"
+        }
+      ]
+    }
+  ],
+  "parserLimitations": []
+}

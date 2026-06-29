@@ -12,4 +12,10 @@ This example shows how a Terraform plan JSON fragment maps to baseline classifie
 
 **Matched rule:** `require-approval-prod-iam-expansion` → `require_approval` (high)
 
+**Reason:** Production IAM expansion increases authority and needs human review.
+
+**Risk summary:** Expands who can perform actions in the account and increases privilege escalation risk.
+
+**Decision record example:** `examples/decisions/terraform-prod-iam-expansion.json`
+
 See the machine-readable case `cf-terraform-prod-iam-expansion` in `classifier-cases.json`.

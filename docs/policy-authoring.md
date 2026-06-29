@@ -14,29 +14,32 @@ Each rule entry must include:
 | `category` | Risk grouping for catalogs and exports |
 | `decision` | Product effect: `allow`, `deny`, `require_approval`, or `observe` |
 | `severity` | Human-facing risk level |
+| `riskSummary` | Plain-language risk summary for reviewers and evidence exports |
 | `when` | Declarative conditions (environment, tool, change types, break-glass signals) |
 | `reason` | Default sentence shown to humans |
 | `reasonPattern` | Optional template with `{placeholders}` filled from classifier output |
 
 Keep policy documents **boring and reviewable**. A platform engineer should understand why a rule fires without reading parser code.
 
-## Reason text readability
+## Reason and risk summary readability
 
-Reason text appears in:
+Reason and risk summary text appear in:
 
 - Control9 SaaS decision and evidence views
 - GitHub and GitLab integration feedback
 - Evidence exports and audit timelines
+- Fixture reports and golden decision records
 
 Guidelines:
 
 1. Write complete sentences in plain language. Prefer "Production IAM expansion increases authority and needs human review." over internal label names.
-2. Use `reasonPattern` when the sentence should include dynamic context (`{changeTypes}`, `{environment}`, `{tool}`).
-3. Do **not** embed raw secret values, credentials, access keys, or full resource payloads in reasons.
-4. Do **not** reference parser internals, stack traces, or unstable resource addresses unless they add necessary context for approval.
-5. Keep deny and require-approval reasons actionable: state what changed and what the operator must do next.
+2. Use `riskSummary` to explain the underlying risk in reviewer-friendly terms without repeating the full reason sentence.
+3. Use `reasonPattern` when the sentence should include dynamic context (`{changeTypes}`, `{environment}`, `{tool}`).
+4. Do **not** embed raw secret values, credentials, access keys, or full resource payloads in reasons or risk summaries.
+5. Do **not** reference parser internals, stack traces, or unstable resource addresses unless they add necessary context for approval.
+6. Keep deny and require-approval reasons actionable: state what changed and what the operator must do next.
 
-See also the reason text section in [`baseline-rule-catalog.md`](baseline-rule-catalog.md).
+See also [`decision-records.md`](decision-records.md) and the reason text section in [`baseline-rule-catalog.md`](baseline-rule-catalog.md).
 
 ## Fixture report output
 
@@ -94,3 +97,4 @@ Until that optional boundary exists:
 - [`classifier-fixtures.md`](classifier-fixtures.md)
 - [`release-process.md`](release-process.md)
 - [`ci-expectations.md`](ci-expectations.md)
+- [`decision-records.md`](decision-records.md)

@@ -16,6 +16,7 @@ REQUIRED_DOCS = [
     "docs/pack-versioning.md",
     "docs/baseline-rule-catalog.md",
     "docs/classifier-fixtures.md",
+    "docs/decision-records.md",
     "CONTRIBUTING.md",
 ]
 
@@ -25,6 +26,7 @@ REQUIRED_EXAMPLE_DIRS = [
     "examples/classifiers/terraform",
     "examples/classifiers/pipeline",
     "examples/classifiers/cloud-audit",
+    "examples/decisions",
 ]
 
 EXAMPLE_MANIFEST = REPO_ROOT / "examples/manifests/production-infra-baseline.v0.1.0.json"
@@ -93,6 +95,7 @@ def validate_docs_examples() -> list[str]:
             "docs/pack-versioning.md",
             "docs/baseline-rule-catalog.md",
             "docs/classifier-fixtures.md",
+            "docs/decision-records.md",
             "CONTRIBUTING.md",
         ):
             if token not in text:

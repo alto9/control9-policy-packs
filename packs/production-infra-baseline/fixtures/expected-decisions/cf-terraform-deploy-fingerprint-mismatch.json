@@ -1,0 +1,80 @@
+{
+  "decisionRecordSchemaVersion": "alto9.io/policy-decision-record/v1alpha1",
+  "packName": "production-infra-baseline",
+  "packVersion": "0.1.0",
+  "fixtureId": "cf-terraform-deploy-fingerprint-mismatch",
+  "toolFamily": "terraform",
+  "matchedRules": [
+    {
+      "ruleId": "require-approval-deploy-verification-mismatch",
+      "category": "deploy-verification-mismatch",
+      "decision": "require_approval",
+      "severity": "high",
+      "riskLevel": "high",
+      "reason": "Deploy artifact or plan fingerprint changed after the prior approval.",
+      "riskSummary": "Approved artifact no longer matches the deploy target; possible tampering or drift.",
+      "changeTypes": [
+        "plan-fingerprint-mismatch"
+      ],
+      "classifierLabels": [
+        "plan-fingerprint-mismatch"
+      ],
+      "resourceIdentity": "aws_s3_bucket.prod_app",
+      "evidenceReferences": [
+        {
+          "kind": "envelope",
+          "path": "inputs/terraform/deploy-fingerprint-mismatch-envelope.json"
+        },
+        {
+          "kind": "artifact",
+          "path": "inputs/terraform/prod-mutation-plan.json"
+        },
+        {
+          "kind": "policyDocument",
+          "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385",
+          "ruleId": "require-approval-deploy-verification-mismatch"
+        },
+        {
+          "kind": "fixtureCase",
+          "path": "classifier-cases.json#cf-terraform-deploy-fingerprint-mismatch"
+        }
+      ]
+    },
+    {
+      "ruleId": "require-approval-prod-mutation",
+      "category": "production-mutation",
+      "decision": "require_approval",
+      "severity": "medium",
+      "riskLevel": "medium",
+      "reason": "Production infrastructure mutation changes live systems and needs human review.",
+      "riskSummary": "Changes live production resources; a mistaken apply could cause outage or data loss.",
+      "changeTypes": [
+        "resource-update"
+      ],
+      "classifierLabels": [
+        "resource-update"
+      ],
+      "resourceIdentity": "aws_s3_bucket.prod_app",
+      "evidenceReferences": [
+        {
+          "kind": "envelope",
+          "path": "inputs/terraform/deploy-fingerprint-mismatch-envelope.json"
+        },
+        {
+          "kind": "artifact",
+          "path": "inputs/terraform/prod-mutation-plan.json"
+        },
+        {
+          "kind": "policyDocument",
+          "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385",
+          "ruleId": "require-approval-prod-mutation"
+        },
+        {
+          "kind": "fixtureCase",
+          "path": "classifier-cases.json#cf-terraform-deploy-fingerprint-mismatch"
+        }
+      ]
+    }
+  ],
+  "parserLimitations": []
+}

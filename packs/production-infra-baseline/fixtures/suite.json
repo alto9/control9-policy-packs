@@ -121,6 +121,14 @@
       "documentationPath": "../../docs/classifier-fixtures.md",
       "runner": "scripts/validate-classifier-fixtures.py",
       "fixtureStatus": "defined"
+    },
+    {
+      "id": "decision-record-expectations",
+      "description": "Golden explainable decision records for each classifier fixture case, including pack version, matched rule metadata, reason, risk summary, change types, and evidence references.",
+      "casesPath": "expected-decisions/",
+      "documentationPath": "../../docs/decision-records.md",
+      "runner": "scripts/validate-decision-records.py",
+      "fixtureStatus": "defined"
     }
   ]
 }

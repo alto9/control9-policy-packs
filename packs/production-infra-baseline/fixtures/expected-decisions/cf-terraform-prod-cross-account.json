@@ -1,0 +1,45 @@
+{
+  "decisionRecordSchemaVersion": "alto9.io/policy-decision-record/v1alpha1",
+  "packName": "production-infra-baseline",
+  "packVersion": "0.1.0",
+  "fixtureId": "cf-terraform-prod-cross-account",
+  "toolFamily": "terraform",
+  "matchedRules": [
+    {
+      "ruleId": "require-approval-prod-cross-account-access",
+      "category": "cross-account-access",
+      "decision": "require_approval",
+      "severity": "critical",
+      "riskLevel": "critical",
+      "reason": "Cross-account access expands blast radius across account boundaries.",
+      "riskSummary": "Grants cross-account access and expands blast radius beyond a single account boundary.",
+      "changeTypes": [
+        "cross-account-access"
+      ],
+      "classifierLabels": [
+        "cross-account-access"
+      ],
+      "resourceIdentity": "aws_s3_bucket_policy.shared_data",
+      "evidenceReferences": [
+        {
+          "kind": "envelope",
+          "path": "inputs/terraform/prod-cross-account-envelope.json"
+        },
+        {
+          "kind": "artifact",
+          "path": "inputs/terraform/prod-cross-account-plan.json"
+        },
+        {
+          "kind": "policyDocument",
+          "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385",
+          "ruleId": "require-approval-prod-cross-account-access"
+        },
+        {
+          "kind": "fixtureCase",
+          "path": "classifier-cases.json#cf-terraform-prod-cross-account"
+        }
+      ]
+    }
+  ],
+  "parserLimitations": []
+}

@@ -1,0 +1,45 @@
+{
+  "decisionRecordSchemaVersion": "alto9.io/policy-decision-record/v1alpha1",
+  "packName": "production-infra-baseline",
+  "packVersion": "0.1.0",
+  "fixtureId": "cf-terraform-dev-low-risk",
+  "toolFamily": "terraform",
+  "matchedRules": [
+    {
+      "ruleId": "allow-low-risk-dev-iac",
+      "category": "production-mutation",
+      "decision": "allow",
+      "severity": "low",
+      "riskLevel": "low",
+      "reason": "Low-risk development infrastructure changes stay fast.",
+      "riskSummary": "Routine development change with low blast radius and no production authority expansion.",
+      "changeTypes": [
+        "resource-create"
+      ],
+      "classifierLabels": [
+        "resource-create"
+      ],
+      "resourceIdentity": "aws_s3_bucket.dev_logs",
+      "evidenceReferences": [
+        {
+          "kind": "envelope",
+          "path": "inputs/terraform/dev-low-risk-envelope.json"
+        },
+        {
+          "kind": "artifact",
+          "path": "inputs/terraform/dev-low-risk-plan.json"
+        },
+        {
+          "kind": "policyDocument",
+          "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385",
+          "ruleId": "allow-low-risk-dev-iac"
+        },
+        {
+          "kind": "fixtureCase",
+          "path": "classifier-cases.json#cf-terraform-dev-low-risk"
+        }
+      ]
+    }
+  ],
+  "parserLimitations": []
+}

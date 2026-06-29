@@ -1,0 +1,41 @@
+{
+  "decisionRecordSchemaVersion": "alto9.io/policy-decision-record/v1alpha1",
+  "packName": "production-infra-baseline",
+  "packVersion": "0.1.0",
+  "fixtureId": "cf-pipeline-unapproved-source",
+  "toolFamily": "pipeline",
+  "matchedRules": [
+    {
+      "ruleId": "require-approval-unapproved-pipeline-source",
+      "category": "unapproved-pipeline-source",
+      "decision": "require_approval",
+      "severity": "high",
+      "riskLevel": "high",
+      "reason": "An untrusted pipeline source requested deploy authority.",
+      "riskSummary": "Untrusted pipeline source requested deploy authority; supply-chain risk needs review.",
+      "changeTypes": [
+        "untrusted-pipeline-source"
+      ],
+      "classifierLabels": [
+        "untrusted-pipeline-source"
+      ],
+      "resourceIdentity": "acme/example-app:deploy-prod.yml",
+      "evidenceReferences": [
+        {
+          "kind": "envelope",
+          "path": "inputs/pipeline/unapproved-source-envelope.json"
+        },
+        {
+          "kind": "policyDocument",
+          "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385",
+          "ruleId": "require-approval-unapproved-pipeline-source"
+        },
+        {
+          "kind": "fixtureCase",
+          "path": "classifier-cases.json#cf-pipeline-unapproved-source"
+        }
+      ]
+    }
+  ],
+  "parserLimitations": []
+}
