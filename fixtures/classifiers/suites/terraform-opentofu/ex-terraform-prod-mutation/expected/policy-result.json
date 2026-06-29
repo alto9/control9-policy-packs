@@ -1,0 +1,37 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-terraform-prod-mutation",
+  "toolFamily": "terraform",
+  "matchedRules": [
+    {
+      "ruleId": "require-approval-prod-mutation",
+      "decision": "require_approval",
+      "severity": "medium",
+      "classifierLabel": "resource-update",
+      "resourceIdentity": "aws_s3_bucket.prod_app",
+      "reason": "Production infrastructure mutation changes live systems and needs human review.",
+      "riskSummary": "Changes live production resources; a mistaken apply could cause outage or data loss.",
+      "changeTypes": [
+        "resource-update"
+      ]
+    }
+  ],
+  "evidenceReferences": [
+    {
+      "kind": "envelope",
+      "path": "input/envelope.json"
+    },
+    {
+      "kind": "artifact",
+      "path": "input/artifact.json"
+    },
+    {
+      "kind": "policyDocument",
+      "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+    },
+    {
+      "kind": "manifest",
+      "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+    }
+  ]
+}

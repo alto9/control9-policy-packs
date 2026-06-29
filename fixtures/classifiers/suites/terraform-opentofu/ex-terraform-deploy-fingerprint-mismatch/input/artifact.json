@@ -1,0 +1,16 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.8.0",
+  "resource_changes": [
+    {
+      "address": "aws_s3_bucket.prod_app",
+      "type": "aws_s3_bucket",
+      "name": "prod_app",
+      "change": {
+        "actions": ["update"],
+        "before": { "versioning": [{ "enabled": false }] },
+        "after": { "versioning": [{ "enabled": true }] }
+      }
+    }
+  ]
+}

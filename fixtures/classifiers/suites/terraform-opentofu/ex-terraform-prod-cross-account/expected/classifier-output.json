@@ -1,0 +1,15 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-terraform-prod-cross-account",
+  "toolFamily": "terraform",
+  "classifierLabels": [
+    "cross-account-access"
+  ],
+  "changeTypes": [
+    "cross-account-access"
+  ],
+  "resourceIdentities": [
+    "aws_s3_bucket_policy.shared_data"
+  ],
+  "parserLimitations": []
+}

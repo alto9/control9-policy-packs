@@ -1,0 +1,37 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-terraform-prod-network-boundary",
+  "toolFamily": "terraform",
+  "matchedRules": [
+    {
+      "ruleId": "require-approval-prod-network-boundary-change",
+      "decision": "require_approval",
+      "severity": "high",
+      "classifierLabel": "security-group-ingress-expanded",
+      "resourceIdentity": "aws_security_group.web",
+      "reason": "Production network boundary changes can expose internal systems.",
+      "riskSummary": "Network boundary changes can expose internal systems to broader ingress or routing risk.",
+      "changeTypes": [
+        "security-group-ingress-expanded"
+      ]
+    }
+  ],
+  "evidenceReferences": [
+    {
+      "kind": "envelope",
+      "path": "input/envelope.json"
+    },
+    {
+      "kind": "artifact",
+      "path": "input/artifact.json"
+    },
+    {
+      "kind": "policyDocument",
+      "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+    },
+    {
+      "kind": "manifest",
+      "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+    }
+  ]
+}

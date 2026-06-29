@@ -1,0 +1,15 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-terraform-secrets-hint",
+  "toolFamily": "terraform",
+  "classifierLabels": [
+    "secret-value-in-plan"
+  ],
+  "changeTypes": [
+    "secret-value-in-plan"
+  ],
+  "resourceIdentities": [
+    "aws_secretsmanager_secret_version.app"
+  ],
+  "parserLimitations": []
+}

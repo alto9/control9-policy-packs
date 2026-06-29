@@ -1,0 +1,15 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-terraform-prod-new-role",
+  "toolFamily": "terraform",
+  "classifierLabels": [
+    "new-role"
+  ],
+  "changeTypes": [
+    "new-role"
+  ],
+  "resourceIdentities": [
+    "aws_iam_role.batch_worker"
+  ],
+  "parserLimitations": []
+}

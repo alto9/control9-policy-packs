@@ -1,0 +1,17 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-terraform-deploy-fingerprint-mismatch",
+  "toolFamily": "terraform",
+  "classifierLabels": [
+    "plan-fingerprint-mismatch",
+    "resource-update"
+  ],
+  "changeTypes": [
+    "plan-fingerprint-mismatch",
+    "resource-update"
+  ],
+  "resourceIdentities": [
+    "aws_s3_bucket.prod_app"
+  ],
+  "parserLimitations": []
+}

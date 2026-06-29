@@ -1,0 +1,37 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-terraform-prod-cross-account",
+  "toolFamily": "terraform",
+  "matchedRules": [
+    {
+      "ruleId": "require-approval-prod-cross-account-access",
+      "decision": "require_approval",
+      "severity": "critical",
+      "classifierLabel": "cross-account-access",
+      "resourceIdentity": "aws_s3_bucket_policy.shared_data",
+      "reason": "Cross-account access expands blast radius across account boundaries.",
+      "riskSummary": "Grants cross-account access and expands blast radius beyond a single account boundary.",
+      "changeTypes": [
+        "cross-account-access"
+      ]
+    }
+  ],
+  "evidenceReferences": [
+    {
+      "kind": "envelope",
+      "path": "input/envelope.json"
+    },
+    {
+      "kind": "artifact",
+      "path": "input/artifact.json"
+    },
+    {
+      "kind": "policyDocument",
+      "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+    },
+    {
+      "kind": "manifest",
+      "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+    }
+  ]
+}
