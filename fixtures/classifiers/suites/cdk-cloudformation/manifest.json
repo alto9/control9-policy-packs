@@ -1,0 +1,7 @@
+{
+  "classifierSuiteSchemaVersion": "alto9.io/classifier-suite/v1alpha1",
+  "id": "cdk-cloudformation",
+  "description": "Semantic classifier fixtures for CDK synthesized templates and CloudFormation template diffs.",
+  "toolFamilies": ["cdk", "cloudformation"],
+  "cases": ["ex-cdk-prod-new-role"]
+}

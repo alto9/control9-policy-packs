@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://alto9.io/schemas/classifier-fixture-result/v1alpha1",
+  "title": "Control9 Classifier Fixture Expected Result",
+  "description": "Shared expected result shape for semantic classifier fixtures. Separates classifier output from policy evaluation metadata while preserving deterministic ordering fields from .ai/data/serialization.md and .ai/runtime/execution_model.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "fixtureResultSchemaVersion",
+    "fixtureId",
+    "toolFamily"
+  ],
+  "properties": {
+    "fixtureResultSchemaVersion": {
+      "type": "string",
+      "const": "alto9.io/classifier-fixture-result/v1alpha1"
+    },
+    "fixtureId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "toolFamily": {
+      "type": "string",
+      "enum": [
+        "cdk",
+        "cloudformation",
+        "terraform",
+        "opentofu",
+        "pipeline",
+        "cloud-audit"
+      ]
+    },
+    "classifierLabels": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "changeTypes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "resourceIdentities": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "parserLimitations": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "matchedRules": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/matchedRule" }
+    },
+    "evidenceReferences": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidenceReference" }
+    }
+  },
+  "$defs": {
+    "evidenceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "envelope",
+            "artifact",
+            "policyDocument",
+            "manifest",
+            "fixtureCase"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "ruleId": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "matchedRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ruleId",
+        "decision",
+        "severity",
+        "classifierLabel",
+        "resourceIdentity",
+        "reason",
+        "riskSummary",
+        "changeTypes"
+      ],
+      "properties": {
+        "ruleId": { "type": "string", "minLength": 1 },
+        "decision": {
+          "type": "string",
+          "enum": ["allow", "deny", "require_approval", "observe"]
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"]
+        },
+        "classifierLabel": { "type": "string", "minLength": 1 },
+        "resourceIdentity": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "riskSummary": { "type": "string", "minLength": 1 },
+        "changeTypes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

@@ -133,9 +133,16 @@ Validate a manifest and classifier fixtures locally:
 
 ```bash
 ./scripts/validate-policy-pack.sh
+./scripts/run-fixtures.sh --all
 python3 scripts/validate-classifier-fixtures.py --report
 python3 scripts/validate-decision-records.py
 ```
+
+Shared classifier fixture layout and suite runner:
+
+- Fixture layout: `fixtures/classifiers/`
+- Suite runner: `./scripts/run-fixtures.sh --all` or `./scripts/run-fixtures.sh --suite <name>`
+- Expected result schema: `schemas/classifier-fixture-result.v1alpha1.schema.json`
 
 Explainable decision records, redaction rules, and golden fixture outputs:
 
