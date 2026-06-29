@@ -155,9 +155,10 @@ Run shared suites locally:
 ./scripts/run-fixtures.sh --all
 ./scripts/run-fixtures.sh --suite cdk-cloudformation
 ./scripts/run-fixtures.sh --suite terraform-opentofu
+./scripts/run-fixtures.sh --suite shadow-enforce
 ```
 
-See `fixtures/classifiers/README.md` and `schemas/classifier-fixture-result.v1alpha1.schema.json`.
+See `fixtures/classifiers/README.md`, `schemas/classifier-fixture-result.v1alpha1.schema.json`, and `schemas/mode-response.v1alpha1.schema.json`.
 
 ## Local validation
 

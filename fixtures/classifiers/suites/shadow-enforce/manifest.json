@@ -1,0 +1,13 @@
+{
+  "classifierSuiteSchemaVersion": "alto9.io/shadow-enforce-suite/v1alpha1",
+  "id": "shadow-enforce",
+  "description": "Shadow and enforce mode parity fixtures proving identical semantic classification and policy results.",
+  "packVersion": "0.1.0",
+  "toolFamilies": [
+    "terraform"
+  ],
+  "cases": [
+    "ex-shadow-enforce-prod-destructive-deny",
+    "ex-shadow-enforce-dev-allow"
+  ]
+}
