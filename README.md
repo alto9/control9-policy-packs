@@ -109,9 +109,24 @@ Classifiers should derive policy-relevant meaning from supported inputs:
 - OPA/Rego import is not the default contract. Add it later only if enterprise buyers need it.
 - Baseline packs should be boring and reviewable. Platform teams should understand why a rule fired.
 
+## Pack Manifests
+
+Each built-in pack ships a repository-owned manifest under `packs/<pack-name>/manifest.json`. Manifests pin pack identity, semantic version, release status, SaaS policy-engine compatibility, artifact references, and provenance. Tenant enablement, overrides, and customer approver groups stay in control9.
+
+- Schema: `schemas/pack-manifest.v1alpha1.schema.json`
+- Versioning rules: `docs/pack-versioning.md`
+- MVP pack manifest: `packs/production-infra-baseline/manifest.json`
+- Reviewer example: `examples/manifests/production-infra-baseline.v0.1.0.json`
+
+Validate a manifest locally:
+
+```bash
+python3 scripts/validate-pack-manifest.py packs/production-infra-baseline/manifest.json
+```
+
 ## Near-Term Build Priorities
 
-- Define the baseline policy pack format and version metadata.
+- Expand baseline rule categories and fixtures for `production-infra-baseline`.
 - Add fixtures for CDK/CloudFormation and Terraform/OpenTofu classifier output.
 - Implement MVP classifiers for IAM expansion, new role, destructive change, network boundary change, production target, secrets exposure hints, and unapproved pipeline source.
 - Add deploy verification and off-path detection rules.

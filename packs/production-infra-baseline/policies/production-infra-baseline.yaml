@@ -1,0 +1,23 @@
+# Production Infrastructure Baseline — policy document stub
+#
+# Full baseline rule categories, decisions, severities, and fixture expectations
+# are defined in follow-on pack content issues. This document exists so the pack
+# manifest can reference a readable policy artifact today.
+#
+# Tenant enablement, approver groups, and customer overrides remain in control9.
+
+apiVersion: alto9.io/v1alpha1
+kind: ChangeControlPolicy
+metadata:
+  name: production-infra-baseline
+  owner: platform-engineering
+spec:
+  packVersion: "0.1.0"
+  status: draft
+  defaults:
+    mode: enforce
+    evidence:
+      retainDays: 365
+      redactSecrets: true
+      store: alto9-managed
+  rules: []

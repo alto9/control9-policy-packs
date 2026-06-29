@@ -1,0 +1,40 @@
+{
+  "manifestSchemaVersion": "alto9.io/pack-manifest/v1alpha1",
+  "pack": {
+    "name": "production-infra-baseline",
+    "displayName": "Production Infrastructure Baseline",
+    "description": "Built-in baseline pack for production mutation, IAM expansion, destructive changes, network boundaries, secrets hints, pipeline sources, cost thresholds, deploy verification mismatch, and off-path findings."
+  },
+  "version": "0.1.0",
+  "releaseStatus": "draft",
+  "compatibility": {
+    "policyEngine": {
+      "semverRange": ">=0.1.0 <1.0.0"
+    }
+  },
+  "artifacts": {
+    "policyDocuments": [
+      {
+        "path": "policies/production-infra-baseline.yaml",
+        "digest": "sha256:40079d837e37ebe5780ebd29b3148451cf68e27b9f1781159d9aaed7c99ad309",
+        "mediaType": "application/yaml",
+        "description": "Readable ChangeControlPolicy document for platform and security review."
+      }
+    ],
+    "compiled": [],
+    "fixtureSuites": [
+      {
+        "path": "fixtures/suite.json",
+        "digest": "sha256:55b4c99a0703a1717e4dd5578159790a20a685558d7dbf90db2901bb0d51c9b2",
+        "mediaType": "application/json",
+        "description": "Fixture suite index proving deterministic classifier and rule evaluation for this pack version."
+      }
+    ]
+  },
+  "provenance": {
+    "sourceRepository": "https://github.com/alto9/control9-policy-packs",
+    "sourceRef": "main",
+    "contentOrigin": "repository",
+    "maintainers": ["platform-engineering"]
+  }
+}
