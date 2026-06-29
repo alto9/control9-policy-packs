@@ -3,5 +3,16 @@
   "id": "cdk-cloudformation",
   "description": "Semantic classifier fixtures for CDK synthesized templates and CloudFormation template diffs.",
   "toolFamilies": ["cdk", "cloudformation"],
-  "cases": ["ex-cdk-prod-new-role"]
+  "cases": [
+    "ex-cdk-dev-low-risk",
+    "ex-cdk-prod-cross-account",
+    "ex-cdk-prod-iam-expansion",
+    "ex-cdk-prod-mutation",
+    "ex-cdk-prod-new-role",
+    "ex-cdk-template-fingerprint-mismatch",
+    "ex-cf-partial-summary",
+    "ex-cf-prod-cross-account",
+    "ex-cf-prod-destructive",
+    "ex-cf-prod-network-boundary"
+  ]
 }

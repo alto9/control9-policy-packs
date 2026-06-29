@@ -1,0 +1,37 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-cf-prod-destructive",
+  "toolFamily": "cloudformation",
+  "matchedRules": [
+    {
+      "ruleId": "deny-prod-destructive-change",
+      "decision": "deny",
+      "severity": "critical",
+      "classifierLabel": "resource-destroy",
+      "resourceIdentity": "LegacyDatabase",
+      "reason": "Destructive production changes require an approved break-glass path.",
+      "riskSummary": "Irreversible or highly disruptive production deletion without an approved break-glass path.",
+      "changeTypes": [
+        "resource-destroy"
+      ]
+    }
+  ],
+  "evidenceReferences": [
+    {
+      "kind": "envelope",
+      "path": "input/envelope.json"
+    },
+    {
+      "kind": "artifact",
+      "path": "input/artifact.json"
+    },
+    {
+      "kind": "policyDocument",
+      "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+    },
+    {
+      "kind": "manifest",
+      "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+    }
+  ]
+}

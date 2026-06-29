@@ -1,0 +1,15 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-cdk-dev-low-risk",
+  "toolFamily": "cdk",
+  "classifierLabels": [
+    "resource-create"
+  ],
+  "changeTypes": [
+    "resource-create"
+  ],
+  "resourceIdentities": [
+    "DevLogsBucket"
+  ],
+  "parserLimitations": []
+}

@@ -1,0 +1,18 @@
+{
+  "ChangeSetName": "partial-summary",
+  "StackName": "PartialSummaryStack",
+  "Changes": [
+    {
+      "ResourceChange": {
+        "Action": "Modify",
+        "LogicalResourceId": "WebSecurityGroup",
+        "ResourceType": null,
+        "Scope": [
+          "Properties",
+          "Tags"
+        ]
+      }
+    }
+  ],
+  "parserNotes": "ResourceType omitted intentionally for partial-summary edge case."
+}

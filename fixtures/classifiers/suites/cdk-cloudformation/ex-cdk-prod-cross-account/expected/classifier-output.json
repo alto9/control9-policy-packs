@@ -1,0 +1,15 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-cdk-prod-cross-account",
+  "toolFamily": "cdk",
+  "classifierLabels": [
+    "cross-account-access"
+  ],
+  "changeTypes": [
+    "cross-account-access"
+  ],
+  "resourceIdentities": [
+    "SharedDataBucketPolicy"
+  ],
+  "parserLimitations": []
+}

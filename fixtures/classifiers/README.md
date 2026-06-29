@@ -2,7 +2,7 @@
 
 Shared layout for semantic classifier fixture suites used by `./scripts/run-fixtures.sh`.
 
-Each suite lives under `suites/<suite-id>/` and groups fixtures for a supported tool family set. Issue #15 and #16 extend these suites with full CDK/CloudFormation and Terraform/OpenTofu coverage.
+Each suite lives under `suites/<suite-id>/` and groups fixtures for a supported tool family set. The `cdk-cloudformation` suite covers CDK and CloudFormation semantics; issue #16 extends `terraform-opentofu` coverage.
 
 ## Layout
 

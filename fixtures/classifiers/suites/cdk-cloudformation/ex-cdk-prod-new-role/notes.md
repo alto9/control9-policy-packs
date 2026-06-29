@@ -14,4 +14,4 @@ CDK synthesized template with a new IAM role logical resource in production.
 
 **Risk summary:** Introduces or changes production role identities and trust relationships.
 
-This bootstrap fixture proves the shared layout. Full CDK and CloudFormation coverage lands in issue #15.
+Pairs with pack case `cf-cdk-prod-new-role` and proves new-role detection for CDK synthesized templates in production.

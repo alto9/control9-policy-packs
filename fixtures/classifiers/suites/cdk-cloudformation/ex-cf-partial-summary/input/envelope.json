@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "alto9.io/classifier-input-envelope/v1alpha1",
+  "toolFamily": "cloudformation",
+  "tool": "cloudformation",
+  "environment": "production",
+  "accountId": "111122223333",
+  "stackName": "PartialSummaryStack",
+  "artifactRef": {
+    "path": "artifact.json",
+    "mediaType": "application/json",
+    "fingerprint": "sha256:1717171717171717171717171717171717171717171717171717171717171717"
+  }
+}

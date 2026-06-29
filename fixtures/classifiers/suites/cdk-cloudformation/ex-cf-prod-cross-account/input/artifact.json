@@ -1,0 +1,26 @@
+{
+  "ChangeSetName": "prod-cross-account-policy",
+  "StackName": "SharedDataStack",
+  "Changes": [
+    {
+      "ResourceChange": {
+        "Action": "Modify",
+        "LogicalResourceId": "SharedDataBucketPolicy",
+        "ResourceType": "AWS::S3::BucketPolicy",
+        "Details": [
+          {
+            "Target": {
+              "Attribute": "Properties",
+              "Name": "PolicyDocument"
+            },
+            "Evaluation": "Static",
+            "ChangeSource": "DirectModification"
+          }
+        ]
+      }
+    }
+  ],
+  "changeSummary": {
+    "addedPrincipal": "arn:aws:iam::999988887777:root"
+  }
+}
