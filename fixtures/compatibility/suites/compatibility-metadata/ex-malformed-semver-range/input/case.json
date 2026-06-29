@@ -1,0 +1,4 @@
+{
+  "policyEngineVersion": "0.5.0",
+  "manifestPath": "fixtures/compatibility/suites/compatibility-metadata/ex-malformed-semver-range/pack/manifest.json"
+}

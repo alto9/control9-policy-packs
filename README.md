@@ -134,6 +134,7 @@ Validate a manifest and classifier fixtures locally:
 ```bash
 ./scripts/validate-policy-pack.sh
 ./scripts/run-fixtures.sh --all
+python3 scripts/validate-pack-manifest.py packs/production-infra-baseline/manifest.json --policy-engine-version 0.5.0
 python3 scripts/validate-classifier-fixtures.py --report
 python3 scripts/validate-decision-records.py
 ```
@@ -141,7 +142,8 @@ python3 scripts/validate-decision-records.py
 Shared classifier fixture layout and suite runner:
 
 - Fixture layout: `fixtures/classifiers/`
-- Suite runner: `./scripts/run-fixtures.sh --all` or `./scripts/run-fixtures.sh --suite <name>` (including `shadow-enforce` for mode parity)
+- Compatibility metadata fixtures: `fixtures/compatibility/` ([`docs/compatibility-metadata.md`](docs/compatibility-metadata.md))
+- Suite runner: `./scripts/run-fixtures.sh --all` or `./scripts/run-fixtures.sh --suite <name>` (including `compatibility-metadata`, `shadow-enforce`, and classifier suites)
 - Expected result schema: `schemas/classifier-fixture-result.v1alpha1.schema.json`
 - Mode response schema: `schemas/mode-response.v1alpha1.schema.json`
 

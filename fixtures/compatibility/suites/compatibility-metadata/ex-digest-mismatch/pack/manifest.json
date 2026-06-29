@@ -1,0 +1,33 @@
+{
+  "manifestSchemaVersion": "alto9.io/pack-manifest/v1alpha1",
+  "pack": {
+    "name": "compatibility-fixture-pack",
+    "displayName": "Compatibility Fixture Pack",
+    "description": "Synthetic pack manifest for compatibility metadata rejection fixtures."
+  },
+  "version": "0.0.1-fixture",
+  "releaseStatus": "draft",
+  "compatibility": {
+    "policyEngine": {
+      "semverRange": ">=0.1.0 <1.0.0"
+    }
+  },
+  "artifacts": {
+    "policyDocuments": [
+      {
+        "path": "policies/baseline.yaml",
+        "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    ],
+    "fixtureSuites": [
+      {
+        "path": "fixtures/suite.json",
+        "digest": "sha256:70929f0e5e2c7cd7055f3507be1a5ce440c02a139d48b57d3fab22d8bb87e69e"
+      }
+    ]
+  },
+  "provenance": {
+    "sourceRepository": "https://github.com/alto9/control9-policy-packs",
+    "contentOrigin": "repository"
+  }
+}

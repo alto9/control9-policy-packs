@@ -1,0 +1,13 @@
+{
+  "compatibilitySuiteSchemaVersion": "alto9.io/compatibility-suite/v1alpha1",
+  "id": "compatibility-metadata",
+  "description": "Pack manifest compatibility metadata consumed by the Control9 SaaS policy engine before artifact load.",
+  "cases": [
+    "ex-valid-production-baseline",
+    "ex-missing-required-metadata",
+    "ex-malformed-semver-range",
+    "ex-incompatible-engine-version",
+    "ex-missing-referenced-artifact",
+    "ex-digest-mismatch"
+  ]
+}

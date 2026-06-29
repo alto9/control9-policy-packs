@@ -1,0 +1,10 @@
+{
+  "compatibilityResultSchemaVersion": "alto9.io/compatibility-result/v1alpha1",
+  "fixtureId": "ex-incompatible-engine-version",
+  "packName": "compatibility-fixture-pack",
+  "packVersion": "0.0.1-fixture",
+  "compatible": false,
+  "failureReasons": [
+    "policy-engine version 2.0.0 is outside compatibility range >=0.1.0 <1.0.0"
+  ]
+}
