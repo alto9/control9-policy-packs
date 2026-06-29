@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "alto9.io/classifier-input-envelope/v1alpha1",
+  "toolFamily": "cloud-audit",
+  "tool": "cloudtrail",
+  "environment": "production",
+  "accountId": "111122223333",
+  "auditEvent": {
+    "eventSource": "s3.amazonaws.com",
+    "eventName": "PutBucketPolicy",
+    "eventTime": "2026-06-29T12:00:00Z",
+    "resourceIdentity": "arn:aws:s3:::prod-shared-data",
+    "principalSummary": "arn:aws:iam::111122223333:user/console-admin",
+    "correlationResult": "no-matching-decision"
+  }
+}

@@ -2,7 +2,7 @@
   "fixtureSuiteSchemaVersion": "alto9.io/fixture-suite/v1alpha1",
   "packName": "production-infra-baseline",
   "packVersion": "0.1.0",
-  "description": "Deterministic fixture expectations for baseline rule categories. Classifier input fixtures and runner scripts are added in follow-on issues.",
+  "description": "Deterministic fixture expectations for baseline rule categories and classifier input fixtures.",
   "suites": [
     {
       "id": "baseline-rule-expectations",
@@ -113,6 +113,14 @@
           "fixtureStatus": "defined"
         }
       ]
+    },
+    {
+      "id": "classifier-input-fixtures",
+      "description": "Classifier input envelopes, expected semantic labels, and edge-case behavior for supported CDK/CloudFormation, Terraform/OpenTofu, pipeline, and cloud audit signals.",
+      "casesPath": "classifier-cases.json",
+      "documentationPath": "../../docs/classifier-fixtures.md",
+      "runner": "scripts/validate-classifier-fixtures.py",
+      "fixtureStatus": "defined"
     }
   ]
 }

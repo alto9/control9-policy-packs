@@ -1,0 +1,516 @@
+{
+  "classifierFixtureSchemaVersion": "alto9.io/classifier-fixture/v1alpha1",
+  "packName": "production-infra-baseline",
+  "packVersion": "0.1.0",
+  "description": "Deterministic classifier input fixtures and expected semantic labels for baseline production infrastructure risks.",
+  "outputOrdering": {
+    "description": "Matched classifier labels and rule IDs sort by severity rank, decision rank, ruleId, classifierLabel, then resourceIdentity (all ascending).",
+    "sortKeys": ["severityRank", "decisionRank", "ruleId", "classifierLabel", "resourceIdentity"],
+    "severityRank": { "critical": 0, "high": 1, "medium": 2, "low": 3 },
+    "decisionRank": { "deny": 0, "require_approval": 1, "observe": 2, "allow": 3 }
+  },
+  "cases": [
+    {
+      "id": "cf-terraform-dev-low-risk",
+      "toolFamily": "terraform",
+      "category": "production-mutation",
+      "description": "Low-risk development Terraform create stays fast.",
+      "input": {
+        "envelopePath": "inputs/terraform/dev-low-risk-envelope.json",
+        "artifactPath": "inputs/terraform/dev-low-risk-plan.json"
+      },
+      "expected": {
+        "classifierLabels": ["resource-create"],
+        "changeTypes": ["resource-create"],
+        "resourceIdentities": ["aws_s3_bucket.dev_logs"],
+        "matchedRules": [
+          {
+            "ruleId": "allow-low-risk-dev-iac",
+            "decision": "allow",
+            "severity": "low",
+            "classifierLabel": "resource-create",
+            "resourceIdentity": "aws_s3_bucket.dev_logs"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-terraform-prod-mutation",
+      "toolFamily": "terraform",
+      "category": "production-mutation",
+      "description": "Production resource update requires approval.",
+      "input": {
+        "envelopePath": "inputs/terraform/prod-mutation-envelope.json",
+        "artifactPath": "inputs/terraform/prod-mutation-plan.json"
+      },
+      "expected": {
+        "classifierLabels": ["resource-update"],
+        "changeTypes": ["resource-update"],
+        "resourceIdentities": ["aws_s3_bucket.prod_app"],
+        "matchedRules": [
+          {
+            "ruleId": "require-approval-prod-mutation",
+            "decision": "require_approval",
+            "severity": "medium",
+            "classifierLabel": "resource-update",
+            "resourceIdentity": "aws_s3_bucket.prod_app"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-opentofu-prod-mutation",
+      "toolFamily": "opentofu",
+      "category": "production-mutation",
+      "description": "OpenTofu production create follows the same mutation semantics as Terraform.",
+      "input": {
+        "envelopePath": "inputs/opentofu/prod-mutation-envelope.json",
+        "artifactPath": "inputs/opentofu/opentofu-prod-mutation-plan.json"
+      },
+      "expected": {
+        "classifierLabels": ["resource-create"],
+        "changeTypes": ["resource-create"],
+        "resourceIdentities": ["aws_dynamodb_table.sessions"],
+        "matchedRules": [
+          {
+            "ruleId": "require-approval-prod-mutation",
+            "decision": "require_approval",
+            "severity": "medium",
+            "classifierLabel": "resource-create",
+            "resourceIdentity": "aws_dynamodb_table.sessions"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-terraform-prod-iam-expansion",
+      "toolFamily": "terraform",
+      "category": "iam-expansion",
+      "description": "Expanded IAM inline policy actions in production.",
+      "input": {
+        "envelopePath": "inputs/terraform/prod-iam-expansion-envelope.json",
+        "artifactPath": "inputs/terraform/prod-iam-expansion-plan.json"
+      },
+      "expected": {
+        "classifierLabels": ["iam-policy-expanded"],
+        "changeTypes": ["iam-policy-expanded"],
+        "resourceIdentities": ["aws_iam_role_policy.prod_app"],
+        "matchedRules": [
+          {
+            "ruleId": "require-approval-prod-iam-expansion",
+            "decision": "require_approval",
+            "severity": "high",
+            "classifierLabel": "iam-policy-expanded",
+            "resourceIdentity": "aws_iam_role_policy.prod_app"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-terraform-prod-new-role",
+      "toolFamily": "terraform",
+      "category": "new-role",
+      "description": "New production IAM role creation.",
+      "input": {
+        "envelopePath": "inputs/terraform/prod-new-role-envelope.json",
+        "artifactPath": "inputs/terraform/prod-new-role-plan.json"
+      },
+      "expected": {
+        "classifierLabels": ["new-role"],
+        "changeTypes": ["new-role"],
+        "resourceIdentities": ["aws_iam_role.batch_worker"],
+        "matchedRules": [
+          {
+            "ruleId": "require-approval-prod-new-role",
+            "decision": "require_approval",
+            "severity": "high",
+            "classifierLabel": "new-role",
+            "resourceIdentity": "aws_iam_role.batch_worker"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-cdk-prod-new-role",
+      "toolFamily": "cdk",
+      "category": "new-role",
+      "description": "CDK synthesized template with a new IAM role logical resource.",
+      "input": {
+        "envelopePath": "inputs/cdk/prod-new-role-envelope.json",
+        "artifactPath": "inputs/cdk/prod-iam-role-template.json"
+      },
+      "expected": {
+        "classifierLabels": ["new-role"],
+        "changeTypes": ["new-role"],
+        "resourceIdentities": ["BatchWorkerRole"],
+        "matchedRules": [
+          {
+            "ruleId": "require-approval-prod-new-role",
+            "decision": "require_approval",
+            "severity": "high",
+            "classifierLabel": "new-role",
+            "resourceIdentity": "BatchWorkerRole"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-terraform-prod-cross-account",
+      "toolFamily": "terraform",
+      "category": "cross-account-access",
+      "description": "Cross-account principal added to a bucket policy.",
+      "input": {
+        "envelopePath": "inputs/terraform/prod-cross-account-envelope.json",
+        "artifactPath": "inputs/terraform/prod-cross-account-plan.json"
+      },
+      "expected": {
+        "classifierLabels": ["cross-account-access"],
+        "changeTypes": ["cross-account-access"],
+        "resourceIdentities": ["aws_s3_bucket_policy.shared_data"],
+        "matchedRules": [
+          {
+            "ruleId": "require-approval-prod-cross-account-access",
+            "decision": "require_approval",
+            "severity": "critical",
+            "classifierLabel": "cross-account-access",
+            "resourceIdentity": "aws_s3_bucket_policy.shared_data"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-terraform-prod-destructive-deny",
+      "toolFamily": "terraform",
+      "category": "destructive-change",
+      "description": "Destructive production database delete without break-glass is denied.",
+      "input": {
+        "envelopePath": "inputs/terraform/prod-destructive-envelope.json",
+        "artifactPath": "inputs/terraform/prod-destructive-plan.json"
+      },
+      "expected": {
+        "classifierLabels": ["database-delete"],
+        "changeTypes": ["database-delete"],
+        "resourceIdentities": ["aws_rds_cluster.legacy"],
+        "matchedRules": [
+          {
+            "ruleId": "deny-prod-destructive-change",
+            "decision": "deny",
+            "severity": "critical",
+            "classifierLabel": "database-delete",
+            "resourceIdentity": "aws_rds_cluster.legacy"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-terraform-prod-destructive-break-glass",
+      "toolFamily": "terraform",
+      "category": "destructive-change",
+      "description": "Same destructive change with break-glass routes to approval.",
+      "input": {
+        "envelopePath": "inputs/terraform/prod-destructive-break-glass-envelope.json",
+        "artifactPath": "inputs/terraform/prod-destructive-plan.json"
+      },
+      "expected": {
+        "classifierLabels": ["database-delete"],
+        "changeTypes": ["database-delete"],
+        "resourceIdentities": ["aws_rds_cluster.legacy"],
+        "matchedRules": [
+          {
+            "ruleId": "require-approval-prod-destructive-break-glass",
+            "decision": "require_approval",
+            "severity": "critical",
+            "classifierLabel": "database-delete",
+            "resourceIdentity": "aws_rds_cluster.legacy"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-cloudformation-prod-destructive",
+      "toolFamily": "cloudformation",
+      "category": "destructive-change",
+      "description": "CloudFormation change set remove action on a database resource.",
+      "input": {
+        "envelopePath": "inputs/cloudformation/prod-destructive-envelope.json",
+        "artifactPath": "inputs/cloudformation/prod-destructive-change-set.json"
+      },
+      "expected": {
+        "classifierLabels": ["resource-destroy"],
+        "changeTypes": ["resource-destroy"],
+        "resourceIdentities": ["LegacyDatabase"],
+        "matchedRules": [
+          {
+            "ruleId": "deny-prod-destructive-change",
+            "decision": "deny",
+            "severity": "critical",
+            "classifierLabel": "resource-destroy",
+            "resourceIdentity": "LegacyDatabase"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-terraform-prod-network-boundary",
+      "toolFamily": "terraform",
+      "category": "network-boundary",
+      "description": "Security group ingress expanded to the public internet.",
+      "input": {
+        "envelopePath": "inputs/terraform/prod-network-boundary-envelope.json",
+        "artifactPath": "inputs/terraform/prod-network-boundary-plan.json"
+      },
+      "expected": {
+        "classifierLabels": ["security-group-ingress-expanded"],
+        "changeTypes": ["security-group-ingress-expanded"],
+        "resourceIdentities": ["aws_security_group.web"],
+        "matchedRules": [
+          {
+            "ruleId": "require-approval-prod-network-boundary-change",
+            "decision": "require_approval",
+            "severity": "high",
+            "classifierLabel": "security-group-ingress-expanded",
+            "resourceIdentity": "aws_security_group.web"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-terraform-secrets-hint",
+      "toolFamily": "terraform",
+      "category": "secrets-exposure-hint",
+      "description": "Secret material hint in plan output uses redacted placeholder only.",
+      "input": {
+        "envelopePath": "inputs/terraform/secrets-hint-envelope.json",
+        "artifactPath": "inputs/terraform/secrets-hint-plan.json"
+      },
+      "expected": {
+        "classifierLabels": ["secret-value-in-plan"],
+        "changeTypes": ["secret-value-in-plan"],
+        "resourceIdentities": ["aws_secretsmanager_secret_version.app"],
+        "matchedRules": [
+          {
+            "ruleId": "require-approval-secrets-exposure-hint",
+            "decision": "require_approval",
+            "severity": "high",
+            "classifierLabel": "secret-value-in-plan",
+            "resourceIdentity": "aws_secretsmanager_secret_version.app"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-pipeline-unapproved-source",
+      "toolFamily": "pipeline",
+      "category": "unapproved-pipeline-source",
+      "description": "Unregistered GitHub Actions workflow requests deploy authority.",
+      "input": {
+        "envelopePath": "inputs/pipeline/unapproved-source-envelope.json"
+      },
+      "expected": {
+        "classifierLabels": ["untrusted-pipeline-source"],
+        "changeTypes": ["untrusted-pipeline-source"],
+        "resourceIdentities": ["acme/example-app:deploy-prod.yml"],
+        "matchedRules": [
+          {
+            "ruleId": "require-approval-unapproved-pipeline-source",
+            "decision": "require_approval",
+            "severity": "high",
+            "classifierLabel": "untrusted-pipeline-source",
+            "resourceIdentity": "acme/example-app:deploy-prod.yml"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-terraform-cost-threshold",
+      "toolFamily": "terraform",
+      "category": "cost-threshold",
+      "description": "Estimated monthly cost delta exceeds configured threshold.",
+      "input": {
+        "envelopePath": "inputs/terraform/cost-threshold-envelope.json",
+        "artifactPath": "inputs/terraform/cost-threshold-plan.json"
+      },
+      "expected": {
+        "classifierLabels": ["budget-threshold-exceeded"],
+        "changeTypes": ["budget-threshold-exceeded"],
+        "resourceIdentities": ["aws_instance.analytics"],
+        "matchedRules": [
+          {
+            "ruleId": "observe-cost-threshold-breach",
+            "decision": "observe",
+            "severity": "medium",
+            "classifierLabel": "budget-threshold-exceeded",
+            "resourceIdentity": "aws_instance.analytics"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-terraform-deploy-fingerprint-mismatch",
+      "toolFamily": "terraform",
+      "category": "deploy-verification-mismatch",
+      "description": "Approved plan fingerprint differs from current artifact fingerprint.",
+      "input": {
+        "envelopePath": "inputs/terraform/deploy-fingerprint-mismatch-envelope.json",
+        "artifactPath": "inputs/terraform/prod-mutation-plan.json"
+      },
+      "expected": {
+        "classifierLabels": ["plan-fingerprint-mismatch", "resource-update"],
+        "changeTypes": ["plan-fingerprint-mismatch", "resource-update"],
+        "resourceIdentities": ["aws_s3_bucket.prod_app"],
+        "matchedRules": [
+          {
+            "ruleId": "require-approval-deploy-verification-mismatch",
+            "decision": "require_approval",
+            "severity": "high",
+            "classifierLabel": "plan-fingerprint-mismatch",
+            "resourceIdentity": "aws_s3_bucket.prod_app"
+          },
+          {
+            "ruleId": "require-approval-prod-mutation",
+            "decision": "require_approval",
+            "severity": "medium",
+            "classifierLabel": "resource-update",
+            "resourceIdentity": "aws_s3_bucket.prod_app"
+          }
+        ],
+        "parserLimitations": []
+      }
+    },
+    {
+      "id": "cf-cloud-audit-off-path",
+      "toolFamily": "cloud-audit",
+      "category": "off-path-finding",
+      "description": "Cloud mutation without a matching Control9 decision on record.",
+      "input": {
+        "envelopePath": "inputs/cloud-audit/off-path-mutation-envelope.json"
+      },
+      "expected": {
+        "classifierLabels": ["off-path-cloud-mutation"],
+        "changeTypes": ["off-path-cloud-mutation"],
+        "resourceIdentities": ["arn:aws:s3:::prod-shared-data"],
+        "matchedRules": [
+          {
+            "ruleId": "observe-off-path-cloud-mutation",
+            "decision": "observe",
+            "severity": "high",
+            "classifierLabel": "off-path-cloud-mutation",
+            "resourceIdentity": "arn:aws:s3:::prod-shared-data"
+          }
+        ],
+        "parserLimitations": []
+      }
+    }
+  ],
+  "edgeCases": [
+    {
+      "id": "cf-edge-unknown-resource-type",
+      "situation": "unknown-resource-type",
+      "description": "Unknown provider resource type is flagged; known sibling resources still classify.",
+      "input": {
+        "envelopePath": "inputs/edge-cases/unknown-resource-envelope.json",
+        "artifactPath": "inputs/edge-cases/unknown-resource-plan.json"
+      },
+      "expected": {
+        "classifierLabels": ["parser-limitation:unknown-resource-type", "resource-update"],
+        "changeTypes": ["resource-update"],
+        "resourceIdentities": ["aws_s3_bucket.known_sidecar", "vendor_unknown_resource.custom_thing"],
+        "matchedRules": [
+          {
+            "ruleId": "require-approval-prod-mutation",
+            "decision": "require_approval",
+            "severity": "medium",
+            "classifierLabel": "resource-update",
+            "resourceIdentity": "aws_s3_bucket.known_sidecar"
+          }
+        ],
+        "parserLimitations": ["unknown-resource-type"]
+      }
+    },
+    {
+      "id": "cf-edge-parser-error",
+      "situation": "parser-error",
+      "description": "Malformed plan JSON yields parse-error limitation and production require_approval.",
+      "input": {
+        "envelopePath": "inputs/edge-cases/parser-error-envelope.json",
+        "artifactPath": "inputs/edge-cases/malformed-plan.json"
+      },
+      "expected": {
+        "classifierLabels": ["parser-limitation:parse-error"],
+        "changeTypes": [],
+        "resourceIdentities": [],
+        "matchedRules": [
+          {
+            "ruleId": "require-approval-prod-mutation",
+            "decision": "require_approval",
+            "severity": "medium",
+            "classifierLabel": "parser-limitation:parse-error",
+            "resourceIdentity": ""
+          }
+        ],
+        "parserLimitations": ["parse-error"]
+      }
+    },
+    {
+      "id": "cf-edge-unsupported-tool",
+      "situation": "unsupported-tool",
+      "description": "Unsupported IaC tool emits limitation metadata and observe-only outcome.",
+      "input": {
+        "envelopePath": "inputs/edge-cases/unsupported-tool-envelope.json"
+      },
+      "expected": {
+        "classifierLabels": ["parser-limitation:unsupported-tool"],
+        "changeTypes": [],
+        "resourceIdentities": [],
+        "matchedRules": [
+          {
+            "ruleId": "observe-off-path-cloud-mutation",
+            "decision": "observe",
+            "severity": "high",
+            "classifierLabel": "parser-limitation:unsupported-tool",
+            "resourceIdentity": ""
+          }
+        ],
+        "parserLimitations": ["unsupported-tool"]
+      }
+    },
+    {
+      "id": "cf-edge-partial-summary",
+      "situation": "partial-summary",
+      "description": "Partial CloudFormation summary classifies present network-boundary signal only.",
+      "input": {
+        "envelopePath": "inputs/cloudformation/partial-summary-envelope.json",
+        "artifactPath": "inputs/cloudformation/partial-change-set-summary.json"
+      },
+      "expected": {
+        "classifierLabels": ["parser-limitation:partial-summary", "security-group-ingress-expanded"],
+        "changeTypes": ["security-group-ingress-expanded"],
+        "resourceIdentities": ["WebSecurityGroup"],
+        "matchedRules": [
+          {
+            "ruleId": "require-approval-prod-network-boundary-change",
+            "decision": "require_approval",
+            "severity": "high",
+            "classifierLabel": "security-group-ingress-expanded",
+            "resourceIdentity": "WebSecurityGroup"
+          }
+        ],
+        "parserLimitations": ["partial-summary"]
+      }
+    }
+  ]
+}

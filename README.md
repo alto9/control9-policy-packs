@@ -116,6 +116,7 @@ The `production-infra-baseline` pack defines stable rule IDs, product decisions,
 - Policy document: `packs/production-infra-baseline/policies/production-infra-baseline.yaml`
 - Reviewer guide: `docs/baseline-rule-catalog.md`
 - Fixture expectation index: `packs/production-infra-baseline/fixtures/suite.json`
+- Classifier fixtures and examples: `docs/classifier-fixtures.md`, `examples/classifiers/`
 
 ## Pack Manifests
 
@@ -126,10 +127,11 @@ Each built-in pack ships a repository-owned manifest under `packs/<pack-name>/ma
 - MVP pack manifest: `packs/production-infra-baseline/manifest.json`
 - Reviewer example: `examples/manifests/production-infra-baseline.v0.1.0.json`
 
-Validate a manifest locally:
+Validate a manifest and classifier fixtures locally:
 
 ```bash
 python3 scripts/validate-pack-manifest.py packs/production-infra-baseline/manifest.json
+python3 scripts/validate-classifier-fixtures.py
 ```
 
 ## Near-Term Build Priorities

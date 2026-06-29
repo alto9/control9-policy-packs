@@ -1,0 +1,19 @@
+{
+  "format_version": "1.2",
+  "resource_changes": [
+    {
+      "address": "aws_security_group.web",
+      "type": "aws_security_group",
+      "name": "web",
+      "change": {
+        "actions": ["update"],
+        "before": {
+          "ingress": [{ "from_port": 443, "to_port": 443, "protocol": "tcp", "cidr_blocks": ["10.0.0.0/8"] }]
+        },
+        "after": {
+          "ingress": [{ "from_port": 443, "to_port": 443, "protocol": "tcp", "cidr_blocks": ["0.0.0.0/0"] }]
+        }
+      }
+    }
+  ]
+}

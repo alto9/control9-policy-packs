@@ -1,0 +1,7 @@
+{
+  "format_version": "1.2",
+  "resource_changes": [
+    {
+      "address": "aws_example_resource.unknown",
+      "type": "aws_example_resource",
+      "change": { "actions": ["create"]

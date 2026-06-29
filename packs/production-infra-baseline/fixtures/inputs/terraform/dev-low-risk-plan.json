@@ -1,0 +1,16 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.8.0",
+  "resource_changes": [
+    {
+      "address": "aws_s3_bucket.dev_logs",
+      "type": "aws_s3_bucket",
+      "name": "dev_logs",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": { "bucket": "dev-logs-example" }
+      }
+    }
+  ]
+}

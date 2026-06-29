@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "alto9.io/classifier-input-envelope/v1alpha1",
+  "toolFamily": "terraform",
+  "tool": "pulumi",
+  "environment": "production",
+  "accountId": "111122223333",
+  "workspace": "prod"
+}

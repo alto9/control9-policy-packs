@@ -69,4 +69,10 @@ control9 wraps those fields with tenant scope, runtime mode, correlation identif
 
 ## Fixture expectations
 
-`packs/production-infra-baseline/fixtures/suite.json` indexes one expectation entry per baseline rule ID. Classifier input fixtures and deterministic runner output are added in follow-on issue #10; this issue defines the expected rule outcomes those fixtures must prove.
+`packs/production-infra-baseline/fixtures/suite.json` indexes one expectation entry per baseline rule ID plus the `classifier-input-fixtures` suite.
+
+Classifier input shapes, example artifacts, deterministic output ordering, and edge-case behavior are documented in `docs/classifier-fixtures.md`. Machine-readable cases live in `packs/production-infra-baseline/fixtures/classifier-cases.json`. Validate locally with:
+
+```bash
+python3 scripts/validate-classifier-fixtures.py
+```

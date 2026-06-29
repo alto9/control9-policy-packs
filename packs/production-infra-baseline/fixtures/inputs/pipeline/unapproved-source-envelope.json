@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "alto9.io/classifier-input-envelope/v1alpha1",
+  "toolFamily": "pipeline",
+  "tool": "github-actions",
+  "environment": "production",
+  "accountId": "111122223333",
+  "pipeline": {
+    "sourceAuthority": "unregistered",
+    "workflow": "deploy-prod.yml",
+    "repository": "acme/example-app",
+    "ref": "refs/heads/main",
+    "artifactFingerprint": "sha256:1818181818181818181818181818181818181818181818181818181818181818"
+  }
+}

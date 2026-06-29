@@ -1,0 +1,20 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.8.0",
+  "resource_changes": [
+    {
+      "address": "aws_iam_role_policy.prod_app",
+      "type": "aws_iam_role_policy",
+      "name": "prod_app",
+      "change": {
+        "actions": ["update"],
+        "before": {
+          "policy": "{\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"s3:GetObject\"],\"Resource\":\"*\"}]}"
+        },
+        "after": {
+          "policy": "{\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"s3:*\"],\"Resource\":\"*\"}]}"
+        }
+      }
+    }
+  ]
+}
