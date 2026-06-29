@@ -2,7 +2,7 @@
 
 Shared layout for semantic classifier fixture suites used by `./scripts/run-fixtures.sh`.
 
-Each suite lives under `suites/<suite-id>/` and groups fixtures for a supported tool family set. The `cdk-cloudformation` suite covers CDK and CloudFormation semantics; issue #16 extends `terraform-opentofu` coverage.
+Each suite lives under `suites/<suite-id>/` and groups fixtures for a supported tool family set. The `cdk-cloudformation` suite covers CDK and CloudFormation semantics; issue #16 extends `terraform-opentofu` coverage. The `shadow-enforce` suite proves shadow and enforce modes share the same semantic classification and policy result.
 
 ## Layout
 
@@ -20,6 +20,26 @@ fixtures/classifiers/
         expected/
           classifier-output.json # semantic labels, change types, resource identities, parser limitations
           policy-result.json     # matched rules, decisions, evidence references
+```
+
+Shadow/enforce mode-comparison cases add paired expected outputs under `expected/shadow/` and `expected/enforce/`:
+
+```
+fixtures/classifiers/suites/shadow-enforce/
+  <fixture-id>/
+    notes.md
+    input/
+      envelope.json
+      artifact.json
+    expected/
+      shadow/
+        classifier-output.json
+        policy-result.json
+        mode-response.json       # blocksWorkflow, isAdvisory, responseSummary
+      enforce/
+        classifier-output.json
+        policy-result.json
+        mode-response.json
 ```
 
 ## Expected result fields
@@ -45,6 +65,7 @@ Matched rules and classifier labels sort deterministically by severity rank, dec
 |----------|---------------|---------|
 | `cdk-cloudformation` | `cdk`, `cloudformation` | CDK synthesized templates and CloudFormation template diffs |
 | `terraform-opentofu` | `terraform`, `opentofu` | Terraform and OpenTofu plan JSON inputs |
+| `shadow-enforce` | `terraform` | Shadow and enforce mode parity for shared semantic classification and policy results |
 
 ## Local commands
 
@@ -54,9 +75,10 @@ From the repository root:
 ./scripts/run-fixtures.sh --all
 ./scripts/run-fixtures.sh --suite cdk-cloudformation
 ./scripts/run-fixtures.sh --suite terraform-opentofu
+./scripts/run-fixtures.sh --suite shadow-enforce
 git diff --check
 ```
 
-The runner validates fixture structure, expected result shape, deterministic ordering, cross-file consistency, and forbidden secret patterns. It does not execute live classifiers yet; it proves the fixture contract that implementation and CI will enforce.
+The runner validates fixture structure, expected result shape, deterministic ordering, cross-file consistency, forbidden secret patterns, and shadow/enforce shared-field parity. It does not execute live classifiers yet; it proves the fixture contract that implementation and CI will enforce.
 
-Schema: `schemas/classifier-fixture-result.v1alpha1.schema.json`
+Schema: `schemas/classifier-fixture-result.v1alpha1.schema.json`, `schemas/mode-response.v1alpha1.schema.json`

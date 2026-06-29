@@ -13,6 +13,7 @@ Usage:
 Known suites:
   cdk-cloudformation
   terraform-opentofu
+  shadow-enforce
 EOF
 }
 

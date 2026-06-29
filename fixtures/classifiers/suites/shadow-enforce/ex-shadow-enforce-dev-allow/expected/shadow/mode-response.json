@@ -1,0 +1,8 @@
+{
+  "modeResponseSchemaVersion": "alto9.io/mode-response/v1alpha1",
+  "runtimeMode": "shadow",
+  "packVersion": "0.1.0",
+  "blocksWorkflow": false,
+  "isAdvisory": false,
+  "responseSummary": "Low-risk development infrastructure changes stay fast."
+}

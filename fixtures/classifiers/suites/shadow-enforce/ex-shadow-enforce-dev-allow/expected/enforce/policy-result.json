@@ -1,0 +1,37 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-shadow-enforce-dev-allow",
+  "toolFamily": "terraform",
+  "matchedRules": [
+    {
+      "ruleId": "allow-low-risk-dev-iac",
+      "decision": "allow",
+      "severity": "low",
+      "classifierLabel": "resource-create",
+      "resourceIdentity": "aws_s3_bucket.dev_logs",
+      "reason": "Low-risk development infrastructure changes stay fast.",
+      "riskSummary": "Routine development change with low blast radius and no production authority expansion.",
+      "changeTypes": [
+        "resource-create"
+      ]
+    }
+  ],
+  "evidenceReferences": [
+    {
+      "kind": "envelope",
+      "path": "input/envelope.json"
+    },
+    {
+      "kind": "artifact",
+      "path": "input/artifact.json"
+    },
+    {
+      "kind": "policyDocument",
+      "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+    },
+    {
+      "kind": "manifest",
+      "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+    }
+  ]
+}

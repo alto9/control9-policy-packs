@@ -24,7 +24,8 @@ SECRET_PATTERNS = [
     re.compile(r"(?i)password\s*[:=]\s*['\"]?[^'\"\s]{8,}"),
 ]
 
-KNOWN_SUITES = ("cdk-cloudformation", "terraform-opentofu")
+KNOWN_SUITES = ("cdk-cloudformation", "terraform-opentofu", "shadow-enforce")
+SHADOW_ENFORCE_SUITE = "shadow-enforce"
 
 
 @dataclass
@@ -35,6 +36,7 @@ class CaseResult:
     passed: bool
     labels: list[str] = field(default_factory=list)
     failure_reason: str | None = None
+    shadow_enforce_parity: bool | None = None
 
 
 def _fail(errors: list[str], message: str) -> None:
@@ -212,6 +214,296 @@ def _validate_policy_result(
         _fail(errors, f"{prefix}: evidenceReferences must be a non-empty array")
 
 
+def _extract_classifier_semantic(document: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "fixtureId": document.get("fixtureId"),
+        "toolFamily": document.get("toolFamily"),
+        "classifierLabels": document.get("classifierLabels"),
+        "changeTypes": document.get("changeTypes"),
+        "resourceIdentities": document.get("resourceIdentities"),
+        "parserLimitations": document.get("parserLimitations", []),
+    }
+
+
+def _extract_policy_semantic(document: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "fixtureId": document.get("fixtureId"),
+        "toolFamily": document.get("toolFamily"),
+        "matchedRules": document.get("matchedRules"),
+        "evidenceReferences": document.get("evidenceReferences"),
+    }
+
+
+def _compare_mode_parity(
+    shadow_value: Any,
+    enforce_value: Any,
+    *,
+    prefix: str,
+    field_name: str,
+    errors: list[str],
+) -> None:
+    if shadow_value != enforce_value:
+        _fail(
+            errors,
+            f"{prefix}: shared {field_name} mismatch between shadow and enforce modes\n"
+            f"  shadow:  {shadow_value!r}\n"
+            f"  enforce: {enforce_value!r}",
+        )
+
+
+def _primary_decision(policy_result: dict[str, Any]) -> str | None:
+    rules = policy_result.get("matchedRules")
+    if not isinstance(rules, list) or not rules:
+        return None
+    first_rule = rules[0]
+    if not isinstance(first_rule, dict):
+        return None
+    decision = first_rule.get("decision")
+    return decision if isinstance(decision, str) else None
+
+
+def _expected_mode_behavior(decision: str, runtime_mode: str) -> tuple[bool, bool]:
+    if decision == "observe":
+        return False, True
+    if decision == "allow":
+        return False, False
+    if runtime_mode == "shadow":
+        if decision == "require_approval":
+            return False, True
+        return False, False
+    if decision in {"deny", "require_approval"}:
+        return True, False
+    return False, False
+
+
+def _validate_mode_response(
+    document: dict[str, Any],
+    policy_result: dict[str, Any],
+    *,
+    prefix: str,
+    expected_runtime_mode: str,
+    expected_pack_version: str,
+    errors: list[str],
+) -> None:
+    if document.get("modeResponseSchemaVersion") != "alto9.io/mode-response/v1alpha1":
+        _fail(errors, f"{prefix}: modeResponseSchemaVersion must be alto9.io/mode-response/v1alpha1")
+
+    runtime_mode = document.get("runtimeMode")
+    if runtime_mode != expected_runtime_mode:
+        _fail(
+            errors,
+            f"{prefix}: runtimeMode must be {expected_runtime_mode!r}, got {runtime_mode!r}",
+        )
+
+    pack_version = document.get("packVersion")
+    if pack_version != expected_pack_version:
+        _fail(
+            errors,
+            f"{prefix}: packVersion must be {expected_pack_version!r}, got {pack_version!r}",
+        )
+
+    decision = _primary_decision(policy_result)
+    if decision is None:
+        _fail(errors, f"{prefix}: cannot derive primary decision from policy result")
+        return
+
+    expected_blocks, expected_advisory = _expected_mode_behavior(decision, expected_runtime_mode)
+    blocks_workflow = document.get("blocksWorkflow")
+    if blocks_workflow is not expected_blocks:
+        _fail(
+            errors,
+            f"{prefix}: blocksWorkflow must be {expected_blocks} for {expected_runtime_mode} + {decision}, got {blocks_workflow!r}",
+        )
+
+    is_advisory = document.get("isAdvisory")
+    if is_advisory is not expected_advisory:
+        _fail(
+            errors,
+            f"{prefix}: isAdvisory must be {expected_advisory} for {expected_runtime_mode} + {decision}, got {is_advisory!r}",
+        )
+
+    response_summary = document.get("responseSummary")
+    if not isinstance(response_summary, str) or not response_summary.strip():
+        _fail(errors, f"{prefix}: responseSummary must be a non-empty string")
+        return
+
+    rules = policy_result.get("matchedRules") or []
+    if rules and isinstance(rules[0], dict):
+        reason = rules[0].get("reason")
+        if isinstance(reason, str) and not response_summary.startswith(reason):
+            _fail(
+                errors,
+                f"{prefix}: responseSummary must start with policy reason {reason!r}",
+            )
+
+
+def _validate_shadow_enforce_case(
+    suite_id: str,
+    suite_dir: Path,
+    case_id: str,
+    allowed_tool_families: set[str],
+    expected_pack_version: str,
+) -> tuple[CaseResult, list[str]]:
+    errors: list[str] = []
+    case_dir = suite_dir / case_id
+    prefix = f"{suite_id}/{case_id}"
+
+    required_paths = [
+        case_dir / "notes.md",
+        case_dir / "input" / "envelope.json",
+        case_dir / "expected" / "shadow" / "classifier-output.json",
+        case_dir / "expected" / "shadow" / "policy-result.json",
+        case_dir / "expected" / "shadow" / "mode-response.json",
+        case_dir / "expected" / "enforce" / "classifier-output.json",
+        case_dir / "expected" / "enforce" / "policy-result.json",
+        case_dir / "expected" / "enforce" / "mode-response.json",
+    ]
+    for path in required_paths:
+        if not path.is_file():
+            _fail(errors, f"{prefix}: missing required file {path.relative_to(REPO_ROOT)}")
+
+    envelope_path = case_dir / "input" / "envelope.json"
+    artifact_path = case_dir / "input" / "artifact.json"
+    scan_paths = [case_dir / "notes.md", envelope_path]
+    for mode in ("shadow", "enforce"):
+        mode_dir = case_dir / "expected" / mode
+        scan_paths.extend(
+            [
+                mode_dir / "classifier-output.json",
+                mode_dir / "policy-result.json",
+                mode_dir / "mode-response.json",
+            ]
+        )
+    if artifact_path.is_file():
+        scan_paths.append(artifact_path)
+    for path in scan_paths:
+        if path.is_file():
+            _scan_secrets(path, errors)
+
+    envelope = _load_json(envelope_path, errors, label=prefix) if envelope_path.is_file() else None
+    if envelope is not None:
+        envelope_family = envelope.get("toolFamily")
+        if envelope_family not in allowed_tool_families:
+            _fail(
+                errors,
+                f"{prefix}: envelope toolFamily {envelope_family!r} not allowed for suite {suite_id}",
+            )
+
+    mode_documents: dict[str, dict[str, dict[str, Any] | None]] = {
+        "shadow": {"classifier": None, "policy": None, "mode_response": None},
+        "enforce": {"classifier": None, "policy": None, "mode_response": None},
+    }
+    tool_family = ""
+
+    for mode in ("shadow", "enforce"):
+        mode_dir = case_dir / "expected" / mode
+        classifier_path = mode_dir / "classifier-output.json"
+        policy_path = mode_dir / "policy-result.json"
+        mode_response_path = mode_dir / "mode-response.json"
+        mode_prefix = f"{prefix}/expected/{mode}"
+
+        classifier_output = (
+            _load_json(classifier_path, errors, label=mode_prefix)
+            if classifier_path.is_file()
+            else None
+        )
+        if classifier_output is not None:
+            validated_family = _validate_classifier_output(
+                classifier_output,
+                errors,
+                prefix=f"{mode_prefix}/classifier-output.json",
+                expected_fixture_id=case_id,
+                allowed_tool_families=allowed_tool_families,
+            )
+            if validated_family:
+                tool_family = validated_family
+        mode_documents[mode]["classifier"] = classifier_output
+
+        policy_result = (
+            _load_json(policy_path, errors, label=mode_prefix) if policy_path.is_file() else None
+        )
+        if policy_result is not None and classifier_output is not None:
+            _validate_policy_result(
+                policy_result,
+                classifier_output,
+                errors,
+                prefix=f"{mode_prefix}/policy-result.json",
+                expected_fixture_id=case_id,
+                allowed_tool_families=allowed_tool_families,
+            )
+        mode_documents[mode]["policy"] = policy_result
+
+        mode_response = (
+            _load_json(mode_response_path, errors, label=mode_prefix)
+            if mode_response_path.is_file()
+            else None
+        )
+        if mode_response is not None and policy_result is not None:
+            _validate_mode_response(
+                mode_response,
+                policy_result,
+                prefix=f"{mode_prefix}/mode-response.json",
+                expected_runtime_mode=mode,
+                expected_pack_version=expected_pack_version,
+                errors=errors,
+            )
+        mode_documents[mode]["mode_response"] = mode_response
+
+    shadow_classifier = mode_documents["shadow"]["classifier"]
+    enforce_classifier = mode_documents["enforce"]["classifier"]
+    if shadow_classifier is not None and enforce_classifier is not None:
+        shadow_semantic = _extract_classifier_semantic(shadow_classifier)
+        enforce_semantic = _extract_classifier_semantic(enforce_classifier)
+        for field_name in shadow_semantic:
+            _compare_mode_parity(
+                shadow_semantic[field_name],
+                enforce_semantic.get(field_name),
+                prefix=prefix,
+                field_name=f"classifier-output.{field_name}",
+                errors=errors,
+            )
+
+    shadow_policy = mode_documents["shadow"]["policy"]
+    enforce_policy = mode_documents["enforce"]["policy"]
+    if shadow_policy is not None and enforce_policy is not None:
+        shadow_semantic = _extract_policy_semantic(shadow_policy)
+        enforce_semantic = _extract_policy_semantic(enforce_policy)
+        for field_name in shadow_semantic:
+            _compare_mode_parity(
+                shadow_semantic[field_name],
+                enforce_semantic.get(field_name),
+                prefix=prefix,
+                field_name=f"policy-result.{field_name}",
+                errors=errors,
+            )
+
+    labels = (
+        list(shadow_classifier.get("classifierLabels") or [])
+        if isinstance(shadow_classifier, dict)
+        else []
+    )
+    parity_ok = (
+        shadow_classifier is not None
+        and enforce_classifier is not None
+        and shadow_policy is not None
+        and enforce_policy is not None
+        and _extract_classifier_semantic(shadow_classifier)
+        == _extract_classifier_semantic(enforce_classifier)
+        and _extract_policy_semantic(shadow_policy) == _extract_policy_semantic(enforce_policy)
+    )
+    passed = not errors
+    result = CaseResult(
+        suite_id=suite_id,
+        fixture_id=case_id,
+        tool_family=tool_family,
+        passed=passed,
+        labels=labels,
+        failure_reason=errors[0] if errors else None,
+        shadow_enforce_parity=parity_ok if passed else False,
+    )
+    return result, errors
+
+
 def _validate_case(
     suite_id: str,
     suite_dir: Path,
@@ -302,8 +594,19 @@ def _load_suite_manifest(suite_id: str) -> tuple[Path | None, dict[str, Any] | N
     if document is None:
         return suite_dir, None, errors
 
-    if document.get("classifierSuiteSchemaVersion") != "alto9.io/classifier-suite/v1alpha1":
+    schema_version = document.get("classifierSuiteSchemaVersion")
+    if suite_id == SHADOW_ENFORCE_SUITE:
+        if schema_version != "alto9.io/shadow-enforce-suite/v1alpha1":
+            _fail(
+                errors,
+                f"{suite_id}: classifierSuiteSchemaVersion must be alto9.io/shadow-enforce-suite/v1alpha1",
+            )
+        pack_version = document.get("packVersion")
+        if not isinstance(pack_version, str) or not pack_version.strip():
+            _fail(errors, f"{suite_id}: packVersion must be a non-empty string")
+    elif schema_version != "alto9.io/classifier-suite/v1alpha1":
         _fail(errors, f"{suite_id}: classifierSuiteSchemaVersion must be alto9.io/classifier-suite/v1alpha1")
+
     if document.get("id") != suite_id:
         _fail(errors, f"{suite_id}: manifest id must match directory name")
 
@@ -334,7 +637,21 @@ def run_suites(suite_ids: list[str]) -> tuple[list[CaseResult], list[str]]:
             if not isinstance(case_id, str):
                 _fail(errors, f"{suite_id}: case IDs must be strings")
                 continue
-            case_result, case_errors = _validate_case(suite_id, suite_dir, case_id, allowed_tool_families)
+            if suite_id == SHADOW_ENFORCE_SUITE:
+                case_result, case_errors = _validate_shadow_enforce_case(
+                    suite_id,
+                    suite_dir,
+                    case_id,
+                    allowed_tool_families,
+                    str(manifest.get("packVersion") or ""),
+                )
+            else:
+                case_result, case_errors = _validate_case(
+                    suite_id,
+                    suite_dir,
+                    case_id,
+                    allowed_tool_families,
+                )
             results.append(case_result)
             errors.extend(case_errors)
 
@@ -353,8 +670,8 @@ def render_report(results: list[CaseResult], suite_ids: list[str]) -> str:
         f"- Passed: {passed}",
         f"- Failed: {failed}",
         "",
-        "| Suite | Fixture ID | Tool family | Labels | Status | Failure |",
-        "|-------|------------|-------------|--------|--------|---------|",
+        "| Suite | Fixture ID | Tool family | Labels | Mode parity | Status | Failure |",
+        "|-------|------------|-------------|--------|-------------|--------|---------|",
     ]
 
     for result in sorted(results, key=lambda item: (item.suite_id, item.fixture_id)):
@@ -363,14 +680,19 @@ def render_report(results: list[CaseResult], suite_ids: list[str]) -> str:
         failure = result.failure_reason or ""
         if len(failure) > 120:
             failure = failure[:117] + "..."
+        if result.shadow_enforce_parity is None:
+            parity = "n/a"
+        else:
+            parity = "match" if result.shadow_enforce_parity else "MISMATCH"
         lines.append(
-            f"| `{result.suite_id}` | `{result.fixture_id}` | `{result.tool_family}` | {labels} | {status} | {failure} |"
+            f"| `{result.suite_id}` | `{result.fixture_id}` | `{result.tool_family}` | {labels} | {parity} | {status} | {failure} |"
         )
 
     lines.extend(
         [
             "",
             "Failures show expected versus actual metadata only. Raw IaC payloads are not printed.",
+            "Shadow/enforce cases compare shared classifier and policy fields across modes; mode-response metadata stays separate.",
             "",
         ]
     )

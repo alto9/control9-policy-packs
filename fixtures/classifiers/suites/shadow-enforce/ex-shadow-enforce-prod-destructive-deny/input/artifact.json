@@ -1,0 +1,15 @@
+{
+  "format_version": "1.2",
+  "resource_changes": [
+    {
+      "address": "aws_rds_cluster.legacy",
+      "type": "aws_rds_cluster",
+      "name": "legacy",
+      "change": {
+        "actions": ["delete"],
+        "before": { "cluster_identifier": "legacy-prod" },
+        "after": null
+      }
+    }
+  ]
+}

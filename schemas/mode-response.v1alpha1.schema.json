@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://alto9.io/schemas/mode-response/v1alpha1",
+  "title": "Control9 Shadow/Enforce Mode Response Metadata",
+  "description": "Mode-specific product response metadata separated from the shared semantic policy result.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "modeResponseSchemaVersion",
+    "runtimeMode",
+    "packVersion",
+    "blocksWorkflow",
+    "isAdvisory",
+    "responseSummary"
+  ],
+  "properties": {
+    "modeResponseSchemaVersion": {
+      "type": "string",
+      "const": "alto9.io/mode-response/v1alpha1"
+    },
+    "runtimeMode": {
+      "type": "string",
+      "enum": ["shadow", "enforce"]
+    },
+    "packVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "blocksWorkflow": {
+      "type": "boolean"
+    },
+    "isAdvisory": {
+      "type": "boolean"
+    },
+    "responseSummary": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
