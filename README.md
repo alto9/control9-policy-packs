@@ -130,9 +130,16 @@ Each built-in pack ships a repository-owned manifest under `packs/<pack-name>/ma
 Validate a manifest and classifier fixtures locally:
 
 ```bash
-python3 scripts/validate-pack-manifest.py packs/production-infra-baseline/manifest.json
-python3 scripts/validate-classifier-fixtures.py
+./scripts/validate-policy-pack.sh
+python3 scripts/validate-classifier-fixtures.py --report
 ```
+
+Release, CI, contribution, and policy authoring guides:
+
+- Release process: `docs/release-process.md`
+- CI expectations: `docs/ci-expectations.md`
+- Policy authoring style: `docs/policy-authoring.md`
+- Contributing: `CONTRIBUTING.md`
 
 ## Near-Term Build Priorities
 

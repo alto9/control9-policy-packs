@@ -160,15 +160,109 @@ def _validate_case(case: dict[str, Any], errors: list[str], *, edge: bool = Fals
     return matched
 
 
-def validate_classifier_fixtures() -> list[str]:
-    errors: list[str] = []
+def _load_cases_document() -> tuple[dict[str, Any] | None, list[str]]:
     if not CASES_PATH.is_file():
-        return [f"classifier cases not found: {CASES_PATH}"]
+        return None, [f"classifier cases not found: {CASES_PATH}"]
 
     try:
         document = json.loads(CASES_PATH.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        return [f"invalid classifier-cases.json: {exc}"]
+        return None, [f"invalid classifier-cases.json: {exc}"]
+
+    if not isinstance(document, dict):
+        return None, ["classifier-cases.json root must be an object"]
+    return document, []
+
+
+def _rule_coverage(document: dict[str, Any]) -> dict[str, list[str]]:
+    coverage: dict[str, list[str]] = {rule_id: [] for rule_id in sorted(REQUIRED_RULE_IDS)}
+    edge_coverage: dict[str, list[str]] = {situation: [] for situation in sorted(REQUIRED_EDGE_SITUATIONS)}
+
+    def record(case: dict[str, Any], *, edge: bool = False) -> None:
+        case_id = str(case.get("id", "<unknown>"))
+        expected = case.get("expected")
+        if isinstance(expected, dict):
+            rules = expected.get("matchedRules")
+            if isinstance(rules, list):
+                for rule in rules:
+                    if isinstance(rule, dict):
+                        rule_id = rule.get("ruleId")
+                        if isinstance(rule_id, str) and rule_id in coverage:
+                            coverage[rule_id].append(case_id)
+        if edge:
+            situation = case.get("situation")
+            if isinstance(situation, str) and situation in edge_coverage:
+                edge_coverage[situation].append(case_id)
+
+    for case in document.get("cases") or []:
+        if isinstance(case, dict):
+            record(case)
+    for case in document.get("edgeCases") or []:
+        if isinstance(case, dict):
+            record(case, edge=True)
+
+    coverage["_edge_cases"] = []
+    for situation, case_ids in edge_coverage.items():
+        coverage[f"edge:{situation}"] = case_ids
+    return coverage
+
+
+def render_fixture_report(document: dict[str, Any]) -> str:
+    cases = [case for case in (document.get("cases") or []) if isinstance(case, dict)]
+    edge_cases = [case for case in (document.get("edgeCases") or []) if isinstance(case, dict)]
+    coverage = _rule_coverage(document)
+
+    lines = [
+        "# Classifier fixture report",
+        "",
+        f"- Pack: `production-infra-baseline`",
+        f"- Cases: {len(cases)}",
+        f"- Edge cases: {len(edge_cases)}",
+        f"- Required baseline rules: {len(REQUIRED_RULE_IDS)}",
+        "",
+        "## Baseline rule coverage",
+        "",
+        "| Rule ID | Fixture case IDs |",
+        "|---------|------------------|",
+    ]
+
+    for rule_id in sorted(REQUIRED_RULE_IDS):
+        case_ids = ", ".join(coverage.get(rule_id, [])) or "(none)"
+        lines.append(f"| `{rule_id}` | {case_ids} |")
+
+    lines.extend(
+        [
+            "",
+            "## Edge situations",
+            "",
+            "| Situation | Fixture case IDs |",
+            "|-----------|------------------|",
+        ]
+    )
+    for situation in sorted(REQUIRED_EDGE_SITUATIONS):
+        case_ids = ", ".join(coverage.get(f"edge:{situation}", [])) or "(none)"
+        lines.append(f"| `{situation}` | {case_ids} |")
+
+    lines.extend(
+        [
+            "",
+            "## Notes",
+            "",
+            "- This report summarizes fixture expectations only.",
+            "- Live classifier execution against these inputs is not yet part of CI.",
+            "- Regenerate with `python3 scripts/validate-classifier-fixtures.py --report`.",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def validate_classifier_fixtures() -> list[str]:
+    errors: list[str] = []
+    document, load_errors = _load_cases_document()
+    if load_errors:
+        return load_errors
+    assert document is not None
 
     if document.get("classifierFixtureSchemaVersion") != "alto9.io/classifier-fixture/v1alpha1":
         _fail(errors, "classifierFixtureSchemaVersion must be alto9.io/classifier-fixture/v1alpha1")
@@ -214,12 +308,42 @@ def validate_classifier_fixtures() -> list[str]:
 
 
 def main() -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--report",
+        action="store_true",
+        help="Print a reviewer-readable fixture coverage report (runs validation first)",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        help="Write the fixture report to this path instead of stdout",
+    )
+    args = parser.parse_args()
+
     errors = validate_classifier_fixtures()
     if errors:
         print("Classifier fixture validation failed:", file=sys.stderr)
         for error in errors:
             print(f"  - {error}", file=sys.stderr)
         return 1
+
+    if args.report:
+        document, load_errors = _load_cases_document()
+        if load_errors:
+            for error in load_errors:
+                print(f"  - {error}", file=sys.stderr)
+            return 1
+        assert document is not None
+        report = render_fixture_report(document)
+        if args.output:
+            args.output.write_text(report, encoding="utf-8")
+            print(f"OK: fixture report written to {args.output}")
+        else:
+            print(report)
+        return 0
 
     print(f"OK: {len(REQUIRED_RULE_IDS)} baseline rules covered, {len(REQUIRED_EDGE_SITUATIONS)} edge cases documented")
     return 0
