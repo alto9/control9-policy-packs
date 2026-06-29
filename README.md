@@ -109,6 +109,14 @@ Classifiers should derive policy-relevant meaning from supported inputs:
 - OPA/Rego import is not the default contract. Add it later only if enterprise buyers need it.
 - Baseline packs should be boring and reviewable. Platform teams should understand why a rule fired.
 
+## Baseline Rule Catalog
+
+The `production-infra-baseline` pack defines stable rule IDs, product decisions, severities, reason patterns, break-glass semantics, and fixture expectations for every baseline risk area. See:
+
+- Policy document: `packs/production-infra-baseline/policies/production-infra-baseline.yaml`
+- Reviewer guide: `docs/baseline-rule-catalog.md`
+- Fixture expectation index: `packs/production-infra-baseline/fixtures/suite.json`
+
 ## Pack Manifests
 
 Each built-in pack ships a repository-owned manifest under `packs/<pack-name>/manifest.json`. Manifests pin pack identity, semantic version, release status, SaaS policy-engine compatibility, artifact references, and provenance. Tenant enablement, overrides, and customer approver groups stay in control9.

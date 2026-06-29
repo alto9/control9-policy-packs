@@ -1,10 +1,8 @@
-# Production Infrastructure Baseline — policy document stub
+# Production Infrastructure Baseline — baseline rule catalog
 #
-# Full baseline rule categories, decisions, severities, and fixture expectations
-# are defined in follow-on pack content issues. This document exists so the pack
-# manifest can reference a readable policy artifact today.
-#
-# Tenant enablement, approver groups, and customer overrides remain in control9.
+# Stable rule IDs, product decisions, severities, and reason patterns for the
+# built-in MVP pack. Tenant enablement, approver group membership, and customer
+# overrides remain in control9.
 
 apiVersion: alto9.io/v1alpha1
 kind: ChangeControlPolicy
@@ -20,4 +18,190 @@ spec:
       retainDays: 365
       redactSecrets: true
       store: alto9-managed
-  rules: []
+  exceptions:
+    breakGlassSignal: breakGlass
+    description: >
+      Break-glass is an envelope signal, not tenant configuration stored in this
+      repository. When breakGlass is true and the matched change is destructive,
+      evaluation routes to require-approval-prod-destructive-break-glass instead
+      of deny-prod-destructive-change. control9 owns approval routing, TTL, and
+      audit for break-glass outcomes.
+  rules:
+    - id: allow-low-risk-dev-iac
+      category: production-mutation
+      when:
+        environment: dev
+        tools: ["terraform", "opentofu", "cdk", "cloudformation"]
+        changeRisk: low
+      decision: allow
+      severity: low
+      riskLevel: low
+      changeTypes: ["resource-create", "resource-update", "resource-destroy"]
+      reason: "Low-risk development infrastructure changes stay fast."
+      reasonPattern: "Low-risk {environment} {tool} change with {changeRisk} risk."
+
+    - id: require-approval-prod-mutation
+      category: production-mutation
+      when:
+        environment: production
+        changeRisk: medium
+        changeTypes: ["resource-create", "resource-update"]
+      decision: require_approval
+      severity: medium
+      riskLevel: medium
+      approverRole: productionPlatformLeads
+      approvalTtl: 4h
+      reason: "Production infrastructure mutation changes live systems and needs human review."
+      reasonPattern: "Production mutation ({changeTypes}) in {environment} requires approval."
+
+    - id: require-approval-prod-iam-expansion
+      category: iam-expansion
+      when:
+        environment: production
+        changeTypes: ["iam-policy-expanded", "iam-inline-policy-expanded", "managed-policy-attachment"]
+      decision: require_approval
+      severity: high
+      riskLevel: high
+      approverRole: productionPlatformLeads
+      approvalTtl: 4h
+      reason: "Production IAM expansion increases authority and needs human review."
+      reasonPattern: "Production IAM expansion ({changeTypes}) requires approval."
+
+    - id: require-approval-prod-new-role
+      category: new-role
+      when:
+        environment: production
+        changeTypes: ["new-role", "new-service-linked-role", "role-trust-policy-changed"]
+      decision: require_approval
+      severity: high
+      riskLevel: high
+      approverRole: productionPlatformLeads
+      approvalTtl: 4h
+      reason: "New or materially changed production roles change who can act in the account."
+      reasonPattern: "Production role change ({changeTypes}) requires approval."
+
+    - id: require-approval-prod-cross-account-access
+      category: cross-account-access
+      when:
+        environment: production
+        changeTypes: ["cross-account-access", "cross-account-trust", "resource-policy-cross-account"]
+      decision: require_approval
+      severity: critical
+      riskLevel: critical
+      approverRole: securityAndPlatformLeads
+      approvalTtl: 4h
+      reason: "Cross-account access expands blast radius across account boundaries."
+      reasonPattern: "Production cross-account access ({changeTypes}) requires approval."
+
+    - id: deny-prod-destructive-change
+      category: destructive-change
+      when:
+        environment: production
+        changeTypes:
+          - resource-destroy
+          - database-delete
+          - stack-delete
+          - network-boundary-remove
+        breakGlass: false
+      decision: deny
+      severity: critical
+      riskLevel: critical
+      reason: "Destructive production changes require an approved break-glass path."
+      reasonPattern: "Destructive production change ({changeTypes}) is denied without break-glass."
+
+    - id: require-approval-prod-destructive-break-glass
+      category: destructive-change
+      when:
+        environment: production
+        changeTypes:
+          - resource-destroy
+          - database-delete
+          - stack-delete
+          - network-boundary-remove
+        breakGlass: true
+      decision: require_approval
+      severity: critical
+      riskLevel: critical
+      approverRole: breakGlassApprovers
+      approvalTtl: 1h
+      reason: "Destructive production change submitted under break-glass requires explicit approval."
+      reasonPattern: "Break-glass destructive change ({changeTypes}) requires approval before proceed."
+
+    - id: require-approval-prod-network-boundary-change
+      category: network-boundary
+      when:
+        environment: production
+        changeTypes:
+          - security-group-ingress-expanded
+          - security-group-egress-expanded
+          - network-acl-changed
+          - route-table-changed
+          - vpc-peering-added
+          - private-endpoint-exposed
+      decision: require_approval
+      severity: high
+      riskLevel: high
+      approverRole: securityAndPlatformLeads
+      approvalTtl: 4h
+      reason: "Production network boundary changes can expose internal systems."
+      reasonPattern: "Production network boundary change ({changeTypes}) requires approval."
+
+    - id: require-approval-secrets-exposure-hint
+      category: secrets-exposure-hint
+      when:
+        changeTypes:
+          - secret-value-in-plan
+          - secret-value-in-template
+          - secret-value-in-diff
+          - secret-value-in-command-summary
+      decision: require_approval
+      severity: high
+      riskLevel: high
+      approverRole: securityAndPlatformLeads
+      approvalTtl: 4h
+      reason: "Possible secret material appeared in plan, template, diff, or command output."
+      reasonPattern: "Secrets exposure hint ({changeTypes}) requires review before proceed."
+
+    - id: require-approval-unapproved-pipeline-source
+      category: unapproved-pipeline-source
+      when:
+        changeTypes: ["untrusted-pipeline-source", "unregistered-workflow", "unsigned-pipeline-artifact"]
+      decision: require_approval
+      severity: high
+      riskLevel: high
+      approverRole: productionPlatformLeads
+      approvalTtl: 4h
+      reason: "An untrusted pipeline source requested deploy authority."
+      reasonPattern: "Unapproved pipeline source ({changeTypes}) requires approval."
+
+    - id: observe-cost-threshold-breach
+      category: cost-threshold
+      when:
+        changeTypes: ["estimated-cost-increase", "budget-threshold-exceeded", "reserved-capacity-change"]
+      decision: observe
+      severity: medium
+      riskLevel: medium
+      reason: "Estimated cost impact exceeded the configured threshold for this change."
+      reasonPattern: "Cost threshold signal ({changeTypes}) recorded for review."
+
+    - id: require-approval-deploy-verification-mismatch
+      category: deploy-verification-mismatch
+      when:
+        changeTypes: ["plan-fingerprint-mismatch", "template-fingerprint-mismatch", "artifact-fingerprint-mismatch"]
+      decision: require_approval
+      severity: high
+      riskLevel: high
+      approverRole: productionPlatformLeads
+      approvalTtl: 2h
+      reason: "Deploy artifact or plan fingerprint changed after the prior approval."
+      reasonPattern: "Deploy verification mismatch ({changeTypes}) requires re-approval."
+
+    - id: observe-off-path-cloud-mutation
+      category: off-path-finding
+      when:
+        changeTypes: ["off-path-cloud-mutation", "untracked-console-change", "audit-event-without-decision"]
+      decision: observe
+      severity: high
+      riskLevel: high
+      reason: "Cloud mutation occurred without a matching Control9 decision on record."
+      reasonPattern: "Off-path finding ({changeTypes}) recorded for evidence timeline review."

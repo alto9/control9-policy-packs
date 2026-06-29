@@ -2,6 +2,117 @@
   "fixtureSuiteSchemaVersion": "alto9.io/fixture-suite/v1alpha1",
   "packName": "production-infra-baseline",
   "packVersion": "0.1.0",
-  "description": "Deterministic fixture suite index for the production infrastructure baseline pack. Individual classifier and rule fixtures are added in follow-on issues.",
-  "suites": []
+  "description": "Deterministic fixture expectations for baseline rule categories. Classifier input fixtures and runner scripts are added in follow-on issues.",
+  "suites": [
+    {
+      "id": "baseline-rule-expectations",
+      "description": "One expectation per stable baseline rule ID defined in production-infra-baseline.yaml.",
+      "expectations": [
+        {
+          "id": "expect-allow-low-risk-dev-iac",
+          "ruleId": "allow-low-risk-dev-iac",
+          "category": "production-mutation",
+          "expectedDecision": "allow",
+          "expectedSeverity": "low",
+          "fixtureStatus": "defined"
+        },
+        {
+          "id": "expect-require-approval-prod-mutation",
+          "ruleId": "require-approval-prod-mutation",
+          "category": "production-mutation",
+          "expectedDecision": "require_approval",
+          "expectedSeverity": "medium",
+          "fixtureStatus": "defined"
+        },
+        {
+          "id": "expect-require-approval-prod-iam-expansion",
+          "ruleId": "require-approval-prod-iam-expansion",
+          "category": "iam-expansion",
+          "expectedDecision": "require_approval",
+          "expectedSeverity": "high",
+          "fixtureStatus": "defined"
+        },
+        {
+          "id": "expect-require-approval-prod-new-role",
+          "ruleId": "require-approval-prod-new-role",
+          "category": "new-role",
+          "expectedDecision": "require_approval",
+          "expectedSeverity": "high",
+          "fixtureStatus": "defined"
+        },
+        {
+          "id": "expect-require-approval-prod-cross-account-access",
+          "ruleId": "require-approval-prod-cross-account-access",
+          "category": "cross-account-access",
+          "expectedDecision": "require_approval",
+          "expectedSeverity": "critical",
+          "fixtureStatus": "defined"
+        },
+        {
+          "id": "expect-deny-prod-destructive-change",
+          "ruleId": "deny-prod-destructive-change",
+          "category": "destructive-change",
+          "expectedDecision": "deny",
+          "expectedSeverity": "critical",
+          "fixtureStatus": "defined"
+        },
+        {
+          "id": "expect-require-approval-prod-destructive-break-glass",
+          "ruleId": "require-approval-prod-destructive-break-glass",
+          "category": "destructive-change",
+          "expectedDecision": "require_approval",
+          "expectedSeverity": "critical",
+          "fixtureStatus": "defined"
+        },
+        {
+          "id": "expect-require-approval-prod-network-boundary-change",
+          "ruleId": "require-approval-prod-network-boundary-change",
+          "category": "network-boundary",
+          "expectedDecision": "require_approval",
+          "expectedSeverity": "high",
+          "fixtureStatus": "defined"
+        },
+        {
+          "id": "expect-require-approval-secrets-exposure-hint",
+          "ruleId": "require-approval-secrets-exposure-hint",
+          "category": "secrets-exposure-hint",
+          "expectedDecision": "require_approval",
+          "expectedSeverity": "high",
+          "fixtureStatus": "defined"
+        },
+        {
+          "id": "expect-require-approval-unapproved-pipeline-source",
+          "ruleId": "require-approval-unapproved-pipeline-source",
+          "category": "unapproved-pipeline-source",
+          "expectedDecision": "require_approval",
+          "expectedSeverity": "high",
+          "fixtureStatus": "defined"
+        },
+        {
+          "id": "expect-observe-cost-threshold-breach",
+          "ruleId": "observe-cost-threshold-breach",
+          "category": "cost-threshold",
+          "expectedDecision": "observe",
+          "expectedSeverity": "medium",
+          "fixtureStatus": "defined"
+        },
+        {
+          "id": "expect-require-approval-deploy-verification-mismatch",
+          "ruleId": "require-approval-deploy-verification-mismatch",
+          "category": "deploy-verification-mismatch",
+          "expectedDecision": "require_approval",
+          "expectedSeverity": "high",
+          "fixtureStatus": "defined"
+        },
+        {
+          "id": "expect-observe-off-path-cloud-mutation",
+          "ruleId": "observe-off-path-cloud-mutation",
+          "category": "off-path-finding",
+          "expectedDecision": "observe",
+          "expectedSeverity": "high",
+          "fixtureStatus": "defined"
+        }
+      ]
+    }
+  ]
 }
