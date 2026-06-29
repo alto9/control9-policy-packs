@@ -1,0 +1,14 @@
+{
+  "ChangeSetName": "prod-delete-stack-resources",
+  "StackName": "ProdAppStack",
+  "Changes": [
+    {
+      "ResourceChange": {
+        "Action": "Remove",
+        "LogicalResourceId": "LegacyDatabase",
+        "PhysicalResourceId": "legacy-prod-db",
+        "ResourceType": "AWS::RDS::DBInstance"
+      }
+    }
+  ]
+}

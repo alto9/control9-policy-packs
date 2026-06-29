@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://alto9.io/schemas/pack-manifest/v1alpha1",
+  "title": "Control9 Policy Pack Manifest",
+  "description": "Repository-owned manifest for a versioned Control9 baseline policy pack. Tenant enablement, overrides, and customer approver groups belong in control9, not in this document.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifestSchemaVersion",
+    "pack",
+    "version",
+    "releaseStatus",
+    "compatibility",
+    "artifacts",
+    "provenance"
+  ],
+  "properties": {
+    "manifestSchemaVersion": {
+      "type": "string",
+      "const": "alto9.io/pack-manifest/v1alpha1"
+    },
+    "pack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "displayName", "description"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "description": "Stable pack identifier consumed by the Control9 policy engine."
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$",
+      "description": "Pack semantic version pinned by control9 for deterministic evaluation."
+    },
+    "releaseStatus": {
+      "type": "string",
+      "enum": ["draft", "released", "deprecated", "replaced"]
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyEngine"],
+      "properties": {
+        "policyEngine": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["semverRange"],
+          "properties": {
+            "semverRange": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Semver range of control9 policy-engine versions that may load and evaluate this pack release."
+            }
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyDocuments", "fixtureSuites"],
+      "properties": {
+        "policyDocuments": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/artifactReference" }
+        },
+        "compiled": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/artifactReference" },
+          "description": "Optional compiled or machine-readable policy artifacts referenced by the manifest."
+        },
+        "fixtureSuites": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/artifactReference" }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceRepository", "contentOrigin"],
+      "properties": {
+        "sourceRepository": {
+          "type": "string",
+          "format": "uri"
+        },
+        "sourceRef": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Git ref, tag, or commit that produced this manifest release."
+        },
+        "sourceCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$"
+        },
+        "contentOrigin": {
+          "type": "string",
+          "enum": ["repository", "fork", "vendor-import"]
+        },
+        "maintainers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "releasedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "deprecation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reason"],
+      "properties": {
+        "deprecatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sunsetDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Point after which control9 should reject new pins of this pack version."
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "replacement": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["packName", "minVersion"],
+          "properties": {
+            "packName": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]*$"
+            },
+            "minVersion": {
+              "type": "string",
+              "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "artifactReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "digest"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^[^/].*",
+          "description": "Repository-relative path from the pack root directory."
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "mediaType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

@@ -15,6 +15,8 @@ This doc describes how artifacts are produced, versioned, reviewed, or packaged.
 - New classifier fixture categories include a local runner command and reviewer-readable fixture report output before they are treated as release-ready pack content.
 - Deprecation rules identify affected pack versions, replacement versions, compatibility constraints, and the point at which control9 should stop accepting a deprecated pack for new pins.
 
+- CI workflow and local commands are documented in `docs/ci-expectations.md` and `./scripts/validate-policy-pack.sh`.
+
 ## Open implementation decisions
 
-No unresolved implementation decisions remain here for issue #2. Exact CI command names are implementation details and must be documented when introduced.
+Exact live-classifier execution in CI remains future work; fixture contract validation ships in issue #11.

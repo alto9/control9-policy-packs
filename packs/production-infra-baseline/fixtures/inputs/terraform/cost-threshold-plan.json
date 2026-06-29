@@ -1,0 +1,15 @@
+{
+  "format_version": "1.2",
+  "resource_changes": [
+    {
+      "address": "aws_instance.analytics",
+      "type": "aws_instance",
+      "name": "analytics",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": { "instance_type": "m6i.4xlarge" }
+      }
+    }
+  ]
+}

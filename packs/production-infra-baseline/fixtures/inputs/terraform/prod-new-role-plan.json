@@ -1,0 +1,18 @@
+{
+  "format_version": "1.2",
+  "resource_changes": [
+    {
+      "address": "aws_iam_role.batch_worker",
+      "type": "aws_iam_role",
+      "name": "batch_worker",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name": "batch-worker-prod",
+          "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ecs-tasks.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}"
+        }
+      }
+    }
+  ]
+}

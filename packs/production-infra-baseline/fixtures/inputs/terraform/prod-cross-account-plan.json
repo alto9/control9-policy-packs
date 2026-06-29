@@ -1,0 +1,17 @@
+{
+  "format_version": "1.2",
+  "resource_changes": [
+    {
+      "address": "aws_s3_bucket_policy.shared_data",
+      "type": "aws_s3_bucket_policy",
+      "name": "shared_data",
+      "change": {
+        "actions": ["update"],
+        "before": null,
+        "after": {
+          "policy": "{\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::999988887777:root\"},\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::shared-data/*\"}]}"
+        }
+      }
+    }
+  ]
+}

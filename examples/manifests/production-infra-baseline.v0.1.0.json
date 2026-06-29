@@ -1,0 +1,40 @@
+{
+  "manifestSchemaVersion": "alto9.io/pack-manifest/v1alpha1",
+  "pack": {
+    "name": "production-infra-baseline",
+    "displayName": "Production Infrastructure Baseline",
+    "description": "Example manifest for reviewers. Mirrors packs/production-infra-baseline/manifest.json at v0.1.0."
+  },
+  "version": "0.1.0",
+  "releaseStatus": "draft",
+  "compatibility": {
+    "policyEngine": {
+      "semverRange": ">=0.1.0 <1.0.0"
+    }
+  },
+  "artifacts": {
+    "policyDocuments": [
+      {
+        "path": "policies/production-infra-baseline.yaml",
+        "digest": "sha256:4155189fc73a5411ff8cb419eb4f32b41051db1ff40721cdb69361aefdfd3758",
+        "mediaType": "application/yaml",
+        "description": "Readable ChangeControlPolicy document for platform and security review."
+      }
+    ],
+    "compiled": [],
+    "fixtureSuites": [
+      {
+        "path": "fixtures/suite.json",
+        "digest": "sha256:e872434a157ee85540a67dca4be1c528bada1a2edb5bfbda91a9f23afd71a0b1",
+        "mediaType": "application/json",
+        "description": "Fixture suite index proving deterministic classifier and rule evaluation for this pack version."
+      }
+    ]
+  },
+  "provenance": {
+    "sourceRepository": "https://github.com/alto9/control9-policy-packs",
+    "sourceRef": "main",
+    "contentOrigin": "repository",
+    "maintainers": ["platform-engineering"]
+  }
+}

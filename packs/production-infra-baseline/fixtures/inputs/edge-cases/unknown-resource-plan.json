@@ -1,0 +1,25 @@
+{
+  "format_version": "1.2",
+  "resource_changes": [
+    {
+      "address": "vendor_unknown_resource.custom_thing",
+      "type": "vendor_unknown_resource/custom_thing",
+      "name": "custom_thing",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": { "name": "custom-prod-widget" }
+      }
+    },
+    {
+      "address": "aws_s3_bucket.known_sidecar",
+      "type": "aws_s3_bucket",
+      "name": "known_sidecar",
+      "change": {
+        "actions": ["update"],
+        "before": { "tags": { "env": "prod" } },
+        "after": { "tags": { "env": "prod", "team": "platform" } }
+      }
+    }
+  ]
+}
