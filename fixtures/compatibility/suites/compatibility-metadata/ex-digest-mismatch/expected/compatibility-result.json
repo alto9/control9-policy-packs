@@ -1,0 +1,10 @@
+{
+  "compatibilityResultSchemaVersion": "alto9.io/compatibility-result/v1alpha1",
+  "fixtureId": "ex-digest-mismatch",
+  "packName": "compatibility-fixture-pack",
+  "packVersion": "0.0.1-fixture",
+  "compatible": false,
+  "failureReasons": [
+    "digest mismatch"
+  ]
+}

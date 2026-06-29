@@ -1,0 +1,4 @@
+{
+  "policyEngineVersion": "0.5.0",
+  "manifestPath": "fixtures/compatibility/suites/compatibility-metadata/ex-digest-mismatch/pack/manifest.json"
+}

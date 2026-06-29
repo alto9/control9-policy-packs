@@ -12,6 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 REQUIRED_DOCS = [
     "docs/release-process.md",
     "docs/ci-expectations.md",
+    "docs/compatibility-metadata.md",
     "docs/policy-authoring.md",
     "docs/pack-versioning.md",
     "docs/baseline-rule-catalog.md",

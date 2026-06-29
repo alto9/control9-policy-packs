@@ -19,6 +19,14 @@ SEMVER_PATTERN = re.compile(
 )
 PACK_NAME_PATTERN = re.compile(r"^[a-z][a-z0-9-]*$")
 DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
+SEMVER_COMPARATOR_PATTERN = re.compile(
+    r"^(?P<op>>=|<=|>|<|=)?"
+    r"(?P<version>"
+    r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
+    r"(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
+    r"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
+    r")$"
+)
 FORBIDDEN_KEYS = {
     "tenant",
     "tenantId",
@@ -49,6 +57,91 @@ def _collect_keys(value: Any, prefix: str = "") -> set[str]:
 
 def _fail(errors: list[str], message: str) -> None:
     errors.append(message)
+
+
+def _parse_semver(version: str) -> tuple[int, int, int, str] | None:
+    match = SEMVER_PATTERN.match(version)
+    if not match:
+        return None
+    return (
+        int(match.group(1)),
+        int(match.group(2)),
+        int(match.group(3)),
+        match.group(0).split("-", 1)[1] if "-" in match.group(0).split("+", 1)[0] else "",
+    )
+
+
+def _compare_semver(left: str, right: str) -> int | None:
+    left_parts = _parse_semver(left)
+    right_parts = _parse_semver(right)
+    if left_parts is None or right_parts is None:
+        return None
+
+    left_core = left_parts[:3]
+    right_core = right_parts[:3]
+    if left_core != right_core:
+        return (left_core > right_core) - (left_core < right_core)
+
+    left_pre = left_parts[3]
+    right_pre = right_parts[3]
+    if not left_pre and not right_pre:
+        return 0
+    if not left_pre:
+        return 1
+    if not right_pre:
+        return -1
+    if left_pre == right_pre:
+        return 0
+    return (left_pre > right_pre) - (left_pre < right_pre)
+
+
+def _split_semver_range(range_str: str) -> list[tuple[str, str]] | None:
+    trimmed = range_str.strip()
+    if not trimmed:
+        return None
+
+    parts = re.split(r"\s+(?=(?:>=|<=|>|<|=))", trimmed)
+    comparators: list[tuple[str, str]] = []
+    for part in parts:
+        piece = part.strip()
+        if not piece:
+            return None
+        match = SEMVER_COMPARATOR_PATTERN.match(piece)
+        if not match:
+            return None
+        op = match.group("op") or "="
+        version = match.group("version")
+        comparators.append((op, version))
+    return comparators or None
+
+
+def _validate_semver_range_syntax(range_str: str) -> str | None:
+    comparators = _split_semver_range(range_str)
+    if comparators is None:
+        return "compatibility.policyEngine.semverRange is malformed"
+    return None
+
+
+def _version_satisfies_range(version: str, range_str: str) -> bool | None:
+    comparators = _split_semver_range(range_str)
+    if comparators is None:
+        return None
+
+    for op, spec_version in comparators:
+        comparison = _compare_semver(version, spec_version)
+        if comparison is None:
+            return None
+        if op == ">=" and comparison < 0:
+            return False
+        if op == "<=" and comparison > 0:
+            return False
+        if op == ">" and comparison <= 0:
+            return False
+        if op == "<" and comparison >= 0:
+            return False
+        if op == "=" and comparison != 0:
+            return False
+    return True
 
 
 def _validate_manifest_structure(manifest: dict[str, Any], errors: list[str]) -> None:
@@ -95,6 +188,12 @@ def _validate_manifest_structure(manifest: dict[str, Any], errors: list[str]) ->
         engine = compatibility.get("policyEngine")
         if not isinstance(engine, dict) or not engine.get("semverRange"):
             _fail(errors, "compatibility.policyEngine.semverRange is required")
+        else:
+            semver_range = engine.get("semverRange")
+            if isinstance(semver_range, str):
+                range_error = _validate_semver_range_syntax(semver_range)
+                if range_error:
+                    _fail(errors, range_error)
     else:
         _fail(errors, "compatibility must be an object")
 
@@ -183,7 +282,43 @@ def _validate_no_tenant_fields(manifest: dict[str, Any], errors: list[str]) -> N
             _fail(errors, f"tenant-specific field is not allowed in pack manifests: {key}")
 
 
-def validate_manifest(manifest_path: Path) -> list[str]:
+def _validate_policy_engine_compatibility(
+    manifest: dict[str, Any], policy_engine_version: str, errors: list[str]
+) -> None:
+    compatibility = manifest.get("compatibility")
+    if not isinstance(compatibility, dict):
+        return
+    engine = compatibility.get("policyEngine")
+    if not isinstance(engine, dict):
+        return
+    semver_range = engine.get("semverRange")
+    if not isinstance(semver_range, str):
+        return
+    if _validate_semver_range_syntax(semver_range):
+        return
+    if not isinstance(policy_engine_version, str) or not SEMVER_PATTERN.match(
+        policy_engine_version
+    ):
+        _fail(errors, "policy-engine version must be a valid semantic version")
+        return
+
+    satisfies = _version_satisfies_range(policy_engine_version, semver_range)
+    if satisfies is None:
+        _fail(errors, "compatibility.policyEngine.semverRange is malformed")
+        return
+    if not satisfies:
+        _fail(
+            errors,
+            "policy-engine version "
+            f"{policy_engine_version} is outside compatibility range {semver_range}",
+        )
+
+
+def validate_manifest(
+    manifest_path: Path,
+    *,
+    policy_engine_version: str | None = None,
+) -> list[str]:
     errors: list[str] = []
     if not manifest_path.is_file():
         return [f"manifest not found: {manifest_path}"]
@@ -199,6 +334,23 @@ def validate_manifest(manifest_path: Path) -> list[str]:
     _validate_no_tenant_fields(manifest, errors)
     _validate_manifest_structure(manifest, errors)
     _validate_artifact_refs(manifest, manifest_path.parent, errors)
+    if policy_engine_version is not None:
+        _validate_policy_engine_compatibility(manifest, policy_engine_version, errors)
+    return errors
+
+
+def validate_manifest_document(
+    manifest: dict[str, Any],
+    pack_root: Path,
+    *,
+    policy_engine_version: str | None = None,
+) -> list[str]:
+    errors: list[str] = []
+    _validate_no_tenant_fields(manifest, errors)
+    _validate_manifest_structure(manifest, errors)
+    _validate_artifact_refs(manifest, pack_root, errors)
+    if policy_engine_version is not None:
+        _validate_policy_engine_compatibility(manifest, policy_engine_version, errors)
     return errors
 
 
@@ -209,8 +361,15 @@ def main() -> int:
         type=Path,
         help="Path to manifest.json (for example packs/production-infra-baseline/manifest.json)",
     )
+    parser.add_argument(
+        "--policy-engine-version",
+        help="Optional control9 policy-engine version to check against compatibility.policyEngine.semverRange",
+    )
     args = parser.parse_args()
-    errors = validate_manifest(args.manifest.resolve())
+    errors = validate_manifest(
+        args.manifest.resolve(),
+        policy_engine_version=args.policy_engine_version,
+    )
     if errors:
         print("Pack manifest validation failed:", file=sys.stderr)
         for error in errors:

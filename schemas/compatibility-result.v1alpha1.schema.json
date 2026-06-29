@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://alto9.io/schemas/compatibility-result/v1alpha1",
+  "title": "Control9 Pack Compatibility Fixture Result",
+  "description": "Expected compatibility validation outcome for a manifest fixture case. Tenant enablement and customer override fields are out of scope.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "compatibilityResultSchemaVersion",
+    "fixtureId",
+    "packName",
+    "packVersion",
+    "compatible",
+    "failureReasons"
+  ],
+  "properties": {
+    "compatibilityResultSchemaVersion": {
+      "type": "string",
+      "const": "alto9.io/compatibility-result/v1alpha1"
+    },
+    "fixtureId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packName": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "packVersion": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "compatible": {
+      "type": "boolean"
+    },
+    "failureReasons": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

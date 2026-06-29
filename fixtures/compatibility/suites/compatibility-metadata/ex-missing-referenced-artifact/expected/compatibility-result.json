@@ -1,0 +1,10 @@
+{
+  "compatibilityResultSchemaVersion": "alto9.io/compatibility-result/v1alpha1",
+  "fixtureId": "ex-missing-referenced-artifact",
+  "packName": "compatibility-fixture-pack",
+  "packVersion": "0.0.1-fixture",
+  "compatible": false,
+  "failureReasons": [
+    "missing referenced artifact"
+  ]
+}

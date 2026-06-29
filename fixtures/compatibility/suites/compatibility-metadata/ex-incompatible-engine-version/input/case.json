@@ -1,0 +1,4 @@
+{
+  "policyEngineVersion": "2.0.0",
+  "manifestPath": "fixtures/compatibility/suites/compatibility-metadata/ex-incompatible-engine-version/pack/manifest.json"
+}

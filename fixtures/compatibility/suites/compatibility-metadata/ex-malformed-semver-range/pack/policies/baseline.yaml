@@ -1,0 +1,5 @@
+apiVersion: alto9.io/v1alpha1
+kind: ChangeControlPolicy
+metadata:
+  name: compatibility-fixture-baseline
+rules: []
