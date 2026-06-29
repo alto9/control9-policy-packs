@@ -11,6 +11,7 @@
     "ex-terraform-cost-threshold",
     "ex-terraform-deploy-fingerprint-mismatch",
     "ex-terraform-dev-low-risk",
+    "ex-terraform-partial-summary",
     "ex-terraform-prod-cross-account",
     "ex-terraform-prod-destructive-break-glass",
     "ex-terraform-prod-destructive-deny",
