@@ -1,0 +1,37 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-cdk-prod-iam-expansion",
+  "toolFamily": "cdk",
+  "matchedRules": [
+    {
+      "ruleId": "require-approval-prod-iam-expansion",
+      "decision": "require_approval",
+      "severity": "high",
+      "classifierLabel": "iam-policy-expanded",
+      "resourceIdentity": "AppRolePolicy",
+      "reason": "Production IAM expansion increases authority and needs human review.",
+      "riskSummary": "Expands who can perform actions in the account and increases privilege escalation risk.",
+      "changeTypes": [
+        "iam-policy-expanded"
+      ]
+    }
+  ],
+  "evidenceReferences": [
+    {
+      "kind": "envelope",
+      "path": "input/envelope.json"
+    },
+    {
+      "kind": "artifact",
+      "path": "input/artifact.json"
+    },
+    {
+      "kind": "policyDocument",
+      "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+    },
+    {
+      "kind": "manifest",
+      "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+    }
+  ]
+}

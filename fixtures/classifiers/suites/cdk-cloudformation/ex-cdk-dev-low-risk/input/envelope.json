@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "alto9.io/classifier-input-envelope/v1alpha1",
+  "toolFamily": "cdk",
+  "tool": "cdk",
+  "environment": "dev",
+  "accountId": "111122223333",
+  "stackName": "DevLogsStack",
+  "artifactRef": {
+    "path": "artifact.json",
+    "mediaType": "application/json",
+    "fingerprint": "sha256:4545454545454545454545454545454545454545454545454545454545454545"
+  }
+}

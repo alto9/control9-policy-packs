@@ -1,0 +1,18 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-terraform-partial-summary",
+  "toolFamily": "terraform",
+  "classifierLabels": [
+    "parser-limitation:partial-summary",
+    "security-group-ingress-expanded"
+  ],
+  "changeTypes": [
+    "security-group-ingress-expanded"
+  ],
+  "resourceIdentities": [
+    "aws_security_group.web"
+  ],
+  "parserLimitations": [
+    "partial-summary"
+  ]
+}

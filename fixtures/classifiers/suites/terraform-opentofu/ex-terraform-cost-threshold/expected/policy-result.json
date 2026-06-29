@@ -1,0 +1,37 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-terraform-cost-threshold",
+  "toolFamily": "terraform",
+  "matchedRules": [
+    {
+      "ruleId": "observe-cost-threshold-breach",
+      "decision": "observe",
+      "severity": "medium",
+      "classifierLabel": "budget-threshold-exceeded",
+      "resourceIdentity": "aws_instance.analytics",
+      "reason": "Estimated cost impact exceeded the configured threshold for this change.",
+      "riskSummary": "Estimated cost or budget threshold exceeded; recorded for finance and platform review.",
+      "changeTypes": [
+        "budget-threshold-exceeded"
+      ]
+    }
+  ],
+  "evidenceReferences": [
+    {
+      "kind": "envelope",
+      "path": "input/envelope.json"
+    },
+    {
+      "kind": "artifact",
+      "path": "input/artifact.json"
+    },
+    {
+      "kind": "policyDocument",
+      "digest": "sha256:7b06cb981615373e33b41a16cfa7d2f78bae52ce7e5ab542703a80ddeffff385"
+    },
+    {
+      "kind": "manifest",
+      "digest": "sha256:497599548f04eb02975c8e97142966825301167e920653584880c2a6528730ed"
+    }
+  ]
+}

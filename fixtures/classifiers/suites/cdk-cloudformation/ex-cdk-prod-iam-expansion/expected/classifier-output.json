@@ -1,0 +1,15 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-cdk-prod-iam-expansion",
+  "toolFamily": "cdk",
+  "classifierLabels": [
+    "iam-policy-expanded"
+  ],
+  "changeTypes": [
+    "iam-policy-expanded"
+  ],
+  "resourceIdentities": [
+    "AppRolePolicy"
+  ],
+  "parserLimitations": []
+}

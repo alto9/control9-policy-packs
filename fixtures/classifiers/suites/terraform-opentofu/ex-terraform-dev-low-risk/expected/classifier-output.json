@@ -1,0 +1,9 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-terraform-dev-low-risk",
+  "toolFamily": "terraform",
+  "classifierLabels": ["resource-create"],
+  "changeTypes": ["resource-create"],
+  "resourceIdentities": ["aws_s3_bucket.dev_logs"],
+  "parserLimitations": []
+}

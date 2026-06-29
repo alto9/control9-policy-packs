@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "alto9.io/classifier-input-envelope/v1alpha1",
+  "toolFamily": "cdk",
+  "tool": "cdk",
+  "environment": "production",
+  "accountId": "111122223333",
+  "stackName": "ProdAppStack",
+  "deployVerification": {
+    "approvedFingerprint": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "currentFingerprint": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "artifactRef": {
+    "path": "artifact.json",
+    "mediaType": "application/json",
+    "fingerprint": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  }
+}

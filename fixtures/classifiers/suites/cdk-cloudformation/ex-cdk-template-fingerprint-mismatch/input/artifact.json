@@ -1,0 +1,13 @@
+{
+  "Resources": {
+    "ProdAppBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "prod-app",
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        }
+      }
+    }
+  }
+}

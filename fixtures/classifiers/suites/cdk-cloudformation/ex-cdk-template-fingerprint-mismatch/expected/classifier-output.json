@@ -1,0 +1,17 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-cdk-template-fingerprint-mismatch",
+  "toolFamily": "cdk",
+  "classifierLabels": [
+    "plan-fingerprint-mismatch",
+    "resource-update"
+  ],
+  "changeTypes": [
+    "plan-fingerprint-mismatch",
+    "resource-update"
+  ],
+  "resourceIdentities": [
+    "ProdAppBucket"
+  ],
+  "parserLimitations": []
+}

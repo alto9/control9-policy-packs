@@ -1,0 +1,27 @@
+{
+  "ChangeSetName": "prod-sg-ingress-expansion",
+  "StackName": "ProdNetworkStack",
+  "Changes": [
+    {
+      "ResourceChange": {
+        "Action": "Modify",
+        "LogicalResourceId": "WebSecurityGroup",
+        "ResourceType": "AWS::EC2::SecurityGroup",
+        "Details": [
+          {
+            "Target": {
+              "Attribute": "Properties",
+              "Name": "SecurityGroupIngress"
+            },
+            "Evaluation": "Static",
+            "ChangeSource": "DirectModification"
+          }
+        ]
+      }
+    }
+  ],
+  "changeSummary": {
+    "ingressBefore": "10.0.0.0/8",
+    "ingressAfter": "0.0.0.0/0"
+  }
+}

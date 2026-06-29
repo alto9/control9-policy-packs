@@ -1,0 +1,10 @@
+{
+  "Resources": {
+    "DevLogsBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "dev-logs-example"
+      }
+    }
+  }
+}

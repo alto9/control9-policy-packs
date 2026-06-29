@@ -1,0 +1,24 @@
+{
+  "classifierSuiteSchemaVersion": "alto9.io/classifier-suite/v1alpha1",
+  "id": "terraform-opentofu",
+  "description": "Semantic classifier fixtures for Terraform and OpenTofu plan JSON inputs.",
+  "toolFamilies": [
+    "terraform",
+    "opentofu"
+  ],
+  "cases": [
+    "ex-opentofu-prod-mutation",
+    "ex-terraform-cost-threshold",
+    "ex-terraform-deploy-fingerprint-mismatch",
+    "ex-terraform-dev-low-risk",
+    "ex-terraform-partial-summary",
+    "ex-terraform-prod-cross-account",
+    "ex-terraform-prod-destructive-break-glass",
+    "ex-terraform-prod-destructive-deny",
+    "ex-terraform-prod-iam-expansion",
+    "ex-terraform-prod-mutation",
+    "ex-terraform-prod-network-boundary",
+    "ex-terraform-prod-new-role",
+    "ex-terraform-secrets-hint"
+  ]
+}

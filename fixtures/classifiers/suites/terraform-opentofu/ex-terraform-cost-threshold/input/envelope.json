@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "alto9.io/classifier-input-envelope/v1alpha1",
+  "toolFamily": "terraform",
+  "tool": "terraform",
+  "environment": "production",
+  "accountId": "111122223333",
+  "workspace": "prod",
+  "costSignals": {
+    "estimatedMonthlyDeltaUsd": 4200,
+    "thresholdUsd": 1000,
+    "signal": "budget-threshold-exceeded"
+  },
+  "artifactRef": {
+    "path": "artifact.json",
+    "mediaType": "application/json",
+    "fingerprint": "sha256:1313131313131313131313131313131313131313131313131313131313131313"
+  }
+}

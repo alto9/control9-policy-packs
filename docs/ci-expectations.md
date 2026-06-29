@@ -10,6 +10,7 @@ CI runs on pull requests and on pushes to `main`. The workflow lives at [`.githu
 |-------|---------|----------------|
 | Pack manifest validation | `python3 scripts/validate-pack-manifest.py packs/production-infra-baseline/manifest.json` | Manifest schema, semver, release status, compatibility metadata, artifact paths, SHA-256 digests, and absence of tenant-specific fields |
 | Classifier fixture validation | `python3 scripts/validate-classifier-fixtures.py` | Fixture structure, baseline rule coverage, edge-case coverage, deterministic ordering, JSON validity, and forbidden secret patterns |
+| Shared classifier suite runner | `./scripts/run-fixtures.sh --all` | Shared `fixtures/classifiers/` layout, expected result shape, suite manifests, deterministic ordering, and cross-file consistency |
 | Decision record validation | `python3 scripts/validate-decision-records.py` | Policy rules include reason and risk summary, fixture expectations match policy metadata, golden decision records stay in sync, and decision output excludes tenant-specific fields |
 | Docs and examples validation | `python3 scripts/validate-docs-examples.py` | Required documentation exists, example manifests validate, and reviewer example paths referenced by docs are present |
 | Whitespace hygiene | `git diff --check` | No trailing whitespace or conflict markers in the diff |

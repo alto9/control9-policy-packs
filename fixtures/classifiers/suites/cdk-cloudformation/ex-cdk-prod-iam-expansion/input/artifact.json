@@ -1,0 +1,41 @@
+{
+  "Resources": {
+    "AppRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "prod-app"
+      }
+    },
+    "AppRolePolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "prod-app-inline",
+        "Roles": [
+          {
+            "Ref": "AppRole"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": "s3:*",
+              "Resource": "*"
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "cdk-diff": {
+          "previousActions": [
+            "s3:GetObject"
+          ],
+          "currentActions": [
+            "s3:*"
+          ]
+        }
+      }
+    }
+  }
+}

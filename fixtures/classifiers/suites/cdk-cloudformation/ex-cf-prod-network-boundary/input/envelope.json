@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "alto9.io/classifier-input-envelope/v1alpha1",
+  "toolFamily": "cloudformation",
+  "tool": "cloudformation",
+  "environment": "production",
+  "accountId": "111122223333",
+  "stackName": "ProdNetworkStack",
+  "artifactRef": {
+    "path": "artifact.json",
+    "mediaType": "application/json",
+    "fingerprint": "sha256:6767676767676767676767676767676767676767676767676767676767676767"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "fixtureResultSchemaVersion": "alto9.io/classifier-fixture-result/v1alpha1",
+  "fixtureId": "ex-terraform-prod-destructive-break-glass",
+  "toolFamily": "terraform",
+  "classifierLabels": [
+    "database-delete"
+  ],
+  "changeTypes": [
+    "database-delete"
+  ],
+  "resourceIdentities": [
+    "aws_rds_cluster.legacy"
+  ],
+  "parserLimitations": []
+}

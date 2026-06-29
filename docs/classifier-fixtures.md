@@ -140,11 +140,31 @@ Examples use **synthetic or redacted** secret hints:
 - Metadata fields such as `secretsHint: true` without literal secret material
 - No AWS access keys, private keys, or live tokens in fixtures
 
+## Shared classifier fixture layout
+
+Issue #14 introduces a repo-root layout under `fixtures/classifiers/` for tool-family suites. Each case separates:
+
+- `input/` source envelopes and artifacts
+- `expected/classifier-output.json` semantic labels, change types, resource identities, and parser limitations
+- `expected/policy-result.json` matched rules, product decisions, and evidence references
+- `notes.md` reviewer-readable fixture notes
+
+Run shared suites locally:
+
+```bash
+./scripts/run-fixtures.sh --all
+./scripts/run-fixtures.sh --suite cdk-cloudformation
+./scripts/run-fixtures.sh --suite terraform-opentofu
+```
+
+See `fixtures/classifiers/README.md` and `schemas/classifier-fixture-result.v1alpha1.schema.json`.
+
 ## Local validation
 
 From the repository root:
 
 ```bash
+./scripts/run-fixtures.sh --all
 python3 scripts/validate-classifier-fixtures.py
 python3 scripts/validate-pack-manifest.py packs/production-infra-baseline/manifest.json
 git diff --check
