@@ -24,6 +24,21 @@ The orchestration script runs all Python checks plus whitespace hygiene:
 
 ## Manifest validation
 
+Check mode (used by CI) verifies manifest structure, semver, release status, compatibility metadata, artifact paths, SHA-256 digests, and absence of tenant-specific fields:
+
+```bash
+python3 scripts/validate-pack-manifest.py packs/production-infra-baseline/manifest.json
+```
+
+Maintainers refresh stale digests locally before opening a release PR:
+
+```bash
+python3 scripts/validate-pack-manifest.py packs/production-infra-baseline/manifest.json --refresh
+python3 scripts/validate-pack-manifest.py packs/production-infra-baseline/manifest.json
+```
+
+Refresh updates only `digest` fields on existing artifact entries under `artifacts.policyDocuments`, `artifacts.compiled`, and `artifacts.fixtureSuites`. CI invokes check mode only; it does not auto-write manifests.
+
 Manifest validation fails release readiness when:
 
 - `compatibility.policyEngine.semverRange` is missing or malformed

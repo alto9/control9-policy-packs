@@ -43,10 +43,11 @@ Typical change types:
 Always refresh manifest artifact digests when referenced files change:
 
 ```bash
+python3 scripts/validate-pack-manifest.py packs/production-infra-baseline/manifest.json --refresh
 python3 scripts/validate-pack-manifest.py packs/production-infra-baseline/manifest.json
 ```
 
-The validator reports digest mismatches with the expected `sha256:` value.
+Use `--refresh` to recompute stale `sha256:` digests from file bytes. Check mode (no flags) reports digest mismatches and exits non-zero without modifying the manifest.
 
 ## Pull request expectations
 
