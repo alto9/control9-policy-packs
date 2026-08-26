@@ -122,13 +122,15 @@ These checks are **not** MVP blockers but are documented boundaries for later wo
 
 ## Engine integration verification
 
-Cross-repo verification proves the control9 policy engine (`@control9/policy`) evaluates deploy-fingerprint and cloud-audit fixtures against policy-packs golden outputs.
+Cross-repo verification proves the control9 policy engine (`@control9/policy`) evaluates deploy-fingerprint, cloud-audit, and compatibility-metadata fixtures against policy-packs golden outputs.
 
 From this repository:
 
 ```bash
 cd control9/control9-policy-packs
 POLICY_PACKS_ROOT=. CONTROL9_POLICY_ROOT=../control9 ./scripts/verify-engine-integration.sh
+POLICY_PACKS_ROOT=. CONTROL9_POLICY_ROOT=../control9 ./scripts/verify-engine-integration.sh --suite compatibility-metadata
+python3 scripts/run-compatibility-fixtures.py --suite compatibility-metadata
 ```
 
 From the control9 monorepo:
@@ -136,14 +138,18 @@ From the control9 monorepo:
 ```bash
 cd control9
 POLICY_PACKS_ROOT=./control9-policy-packs npm test -w @control9/policy
+POLICY_PACKS_ROOT=./control9-policy-packs npm test -w @control9/policy -- compatibility-metadata
 ```
 
 Expected outcomes:
 
 - `./scripts/verify-engine-integration.sh` exits `0`
+- `./scripts/verify-engine-integration.sh --suite compatibility-metadata` exits `0` after all six compatibility-metadata fixture cases pass in vitest
+- `python3 scripts/run-compatibility-fixtures.py --suite compatibility-metadata` exits `0` (fixture-definition regression)
 - Pack case `cf-terraform-deploy-fingerprint-mismatch` matches `packs/production-infra-baseline/fixtures/expected-decisions/cf-terraform-deploy-fingerprint-mismatch.json`
 - Pack case `cf-cloud-audit-off-path` matches `packs/production-infra-baseline/fixtures/expected-decisions/cf-cloud-audit-off-path.json`
 - Shared suite case `ex-terraform-deploy-fingerprint-mismatch` matches semantic fields in `fixtures/classifiers/suites/terraform-opentofu/ex-terraform-deploy-fingerprint-mismatch/expected/policy-result.json`
+- Compatibility outputs include pack name, version, compatibility boolean, and failure-reason fragments only (no raw IaC payloads, secrets, or tenant fields)
 - Engine output includes evidence references for envelope, artifact (when applicable), policy document, and fixture case with digests/paths only (no tenant fields)
 
 ## Related documents
