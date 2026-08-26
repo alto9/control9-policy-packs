@@ -16,6 +16,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from classifiers.cdk_cloudformation import classify as classify_cdk_cloudformation
+from classifiers.mode_response import expected_mode_behavior, primary_decision, project_mode_response
 from classifiers.policy_evaluate import evaluate_policy
 from classifiers.terraform_opentofu.classify import classify as classify_terraform_opentofu
 
@@ -49,6 +50,14 @@ POLICY_COMPARE_FIELDS = (
     "toolFamily",
     "matchedRules",
     "evidenceReferences",
+)
+MODE_RESPONSE_COMPARE_FIELDS = (
+    "modeResponseSchemaVersion",
+    "runtimeMode",
+    "packVersion",
+    "blocksWorkflow",
+    "isAdvisory",
+    "responseSummary",
 )
 
 
@@ -276,31 +285,6 @@ def _compare_mode_parity(
         )
 
 
-def _primary_decision(policy_result: dict[str, Any]) -> str | None:
-    rules = policy_result.get("matchedRules")
-    if not isinstance(rules, list) or not rules:
-        return None
-    first_rule = rules[0]
-    if not isinstance(first_rule, dict):
-        return None
-    decision = first_rule.get("decision")
-    return decision if isinstance(decision, str) else None
-
-
-def _expected_mode_behavior(decision: str, runtime_mode: str) -> tuple[bool, bool]:
-    if decision == "observe":
-        return False, True
-    if decision == "allow":
-        return False, False
-    if runtime_mode == "shadow":
-        if decision == "require_approval":
-            return False, True
-        return False, False
-    if decision in {"deny", "require_approval"}:
-        return True, False
-    return False, False
-
-
 def _validate_mode_response(
     document: dict[str, Any],
     policy_result: dict[str, Any],
@@ -327,12 +311,12 @@ def _validate_mode_response(
             f"{prefix}: packVersion must be {expected_pack_version!r}, got {pack_version!r}",
         )
 
-    decision = _primary_decision(policy_result)
+    decision = primary_decision(policy_result)
     if decision is None:
         _fail(errors, f"{prefix}: cannot derive primary decision from policy result")
         return
 
-    expected_blocks, expected_advisory = _expected_mode_behavior(decision, expected_runtime_mode)
+    expected_blocks, expected_advisory = expected_mode_behavior(decision, expected_runtime_mode)
     blocks_workflow = document.get("blocksWorkflow")
     if blocks_workflow is not expected_blocks:
         _fail(
@@ -360,6 +344,229 @@ def _validate_mode_response(
                 errors,
                 f"{prefix}: responseSummary must start with policy reason {reason!r}",
             )
+
+
+def _run_live_shadow_enforce_case(
+    suite_id: str,
+    suite_dir: Path,
+    case_id: str,
+    allowed_tool_families: set[str],
+    expected_pack_version: str,
+) -> tuple[CaseResult, list[str]]:
+    errors: list[str] = []
+    case_dir = suite_dir / case_id
+    prefix = f"{suite_id}/{case_id}"
+
+    required_paths = [
+        case_dir / "notes.md",
+        case_dir / "input" / "envelope.json",
+        case_dir / "input" / "artifact.json",
+    ]
+    for mode in ("shadow", "enforce"):
+        mode_dir = case_dir / "expected" / mode
+        required_paths.extend(
+            [
+                mode_dir / "classifier-output.json",
+                mode_dir / "policy-result.json",
+                mode_dir / "mode-response.json",
+            ]
+        )
+    for path in required_paths:
+        if not path.is_file():
+            _fail(errors, f"{prefix}: missing required file {path.relative_to(REPO_ROOT)}")
+
+    envelope_path = case_dir / "input" / "envelope.json"
+    artifact_path = case_dir / "input" / "artifact.json"
+    scan_paths = [case_dir / "notes.md", envelope_path, artifact_path]
+    for mode in ("shadow", "enforce"):
+        mode_dir = case_dir / "expected" / mode
+        scan_paths.extend(
+            [
+                mode_dir / "classifier-output.json",
+                mode_dir / "policy-result.json",
+                mode_dir / "mode-response.json",
+            ]
+        )
+    for path in scan_paths:
+        if path.is_file():
+            _scan_secrets(path, errors)
+
+    envelope = _load_json(envelope_path, errors, label=prefix) if envelope_path.is_file() else None
+    artifact = _load_json(artifact_path, errors, label=prefix) if artifact_path.is_file() else None
+    if envelope is not None:
+        envelope_family = envelope.get("toolFamily")
+        if envelope_family not in allowed_tool_families:
+            _fail(
+                errors,
+                f"{prefix}: envelope toolFamily {envelope_family!r} not allowed for suite {suite_id}",
+            )
+
+    live_classifier: dict[str, Any] | None = None
+    live_policy: dict[str, Any] | None = None
+    label_resource_pairs: list[tuple[str, str]] = []
+    tool_family = ""
+
+    if envelope is not None and artifact is not None and not errors:
+        try:
+            live_classifier, label_resource_pairs = _classify_live(
+                suite_id,
+                envelope,
+                artifact,
+                fixture_id=case_id,
+            )
+        except ValueError as exc:
+            _fail(errors, f"{prefix}: live classifier failed: {exc}")
+        else:
+            _scan_secrets_text(
+                json.dumps(live_classifier, separators=(",", ":"), sort_keys=True),
+                errors,
+                label=f"{prefix}/live classifier output",
+            )
+            validated_family = _validate_classifier_output(
+                live_classifier,
+                errors,
+                prefix=f"{prefix}/live classifier output",
+                expected_fixture_id=case_id,
+                allowed_tool_families=allowed_tool_families,
+            )
+            tool_family = validated_family or ""
+
+    if (
+        live_classifier is not None
+        and envelope is not None
+        and label_resource_pairs
+        and not errors
+    ):
+        try:
+            live_policy = evaluate_policy(
+                envelope,
+                live_classifier,
+                fixture_id=case_id,
+                label_resource_pairs=label_resource_pairs,
+            )
+        except ValueError as exc:
+            _fail(errors, f"{prefix}: live policy evaluation failed: {exc}")
+        else:
+            _scan_secrets_text(
+                json.dumps(live_policy, separators=(",", ":"), sort_keys=True),
+                errors,
+                label=f"{prefix}/live policy output",
+            )
+
+    for mode in ("shadow", "enforce"):
+        mode_dir = case_dir / "expected" / mode
+        mode_prefix = f"{prefix}/expected/{mode}"
+        expected_classifier = _load_json(
+            mode_dir / "classifier-output.json",
+            errors,
+            label=mode_prefix,
+        )
+        expected_policy = _load_json(
+            mode_dir / "policy-result.json",
+            errors,
+            label=mode_prefix,
+        )
+        expected_mode_response = _load_json(
+            mode_dir / "mode-response.json",
+            errors,
+            label=mode_prefix,
+        )
+
+        if live_classifier is not None and expected_classifier is not None:
+            _compare_live_classifier_output(
+                live_classifier,
+                expected_classifier,
+                errors,
+                prefix=f"{mode_prefix}/classifier-output.json",
+            )
+
+        if live_policy is not None and expected_policy is not None:
+            _compare_live_policy_result(
+                live_policy,
+                expected_policy,
+                errors,
+                prefix=f"{mode_prefix}/policy-result.json",
+            )
+
+        if live_policy is not None and expected_mode_response is not None and not errors:
+            try:
+                live_mode_response = project_mode_response(
+                    live_policy,
+                    runtime_mode=mode,
+                    pack_version=expected_pack_version,
+                )
+            except ValueError as exc:
+                _fail(errors, f"{prefix}: live mode projection failed for {mode}: {exc}")
+            else:
+                _scan_secrets_text(
+                    json.dumps(live_mode_response, separators=(",", ":"), sort_keys=True),
+                    errors,
+                    label=f"{prefix}/live mode-response ({mode})",
+                )
+                _compare_live_mode_response(
+                    live_mode_response,
+                    expected_mode_response,
+                    errors,
+                    prefix=f"{mode_prefix}/mode-response.json",
+                )
+                _validate_mode_response(
+                    live_mode_response,
+                    live_policy,
+                    prefix=f"{mode_prefix}/mode-response.json",
+                    expected_runtime_mode=mode,
+                    expected_pack_version=expected_pack_version,
+                    errors=errors,
+                )
+
+    parity_ok = False
+    if live_classifier is not None and live_policy is not None and not errors:
+        shadow_classifier = _load_json(
+            case_dir / "expected" / "shadow" / "classifier-output.json",
+            errors,
+            label=prefix,
+        )
+        enforce_classifier = _load_json(
+            case_dir / "expected" / "enforce" / "classifier-output.json",
+            errors,
+            label=prefix,
+        )
+        shadow_policy = _load_json(
+            case_dir / "expected" / "shadow" / "policy-result.json",
+            errors,
+            label=prefix,
+        )
+        enforce_policy = _load_json(
+            case_dir / "expected" / "enforce" / "policy-result.json",
+            errors,
+            label=prefix,
+        )
+        if (
+            isinstance(shadow_classifier, dict)
+            and isinstance(enforce_classifier, dict)
+            and isinstance(shadow_policy, dict)
+            and isinstance(enforce_policy, dict)
+        ):
+            parity_ok = (
+                _extract_classifier_semantic(live_classifier)
+                == _extract_classifier_semantic(shadow_classifier)
+                == _extract_classifier_semantic(enforce_classifier)
+                and _extract_policy_semantic(live_policy)
+                == _extract_policy_semantic(shadow_policy)
+                == _extract_policy_semantic(enforce_policy)
+            )
+
+    labels = list((live_classifier or {}).get("classifierLabels") or [])
+    passed = not errors
+    result = CaseResult(
+        suite_id=suite_id,
+        fixture_id=case_id,
+        tool_family=tool_family,
+        passed=passed,
+        labels=labels,
+        failure_reason=errors[0] if errors else None,
+        shadow_enforce_parity=parity_ok if passed else False,
+    )
+    return result, errors
 
 
 def _validate_shadow_enforce_case(
@@ -535,11 +742,11 @@ def _classify_live(
     artifact: dict[str, Any],
     *,
     fixture_id: str,
-) -> tuple[dict[str, Any], list[tuple[str, str]] | None]:
-    if suite_id == "cdk-cloudformation":
-        return classify_cdk_cloudformation(envelope, artifact, fixture_id=fixture_id)
-    if suite_id == "terraform-opentofu":
-        return classify_terraform_opentofu(envelope, artifact, fixture_id=fixture_id), None
+) -> tuple[dict[str, Any], list[tuple[str, str]]]:
+    if suite_id in {"cdk-cloudformation", "terraform-opentofu", SHADOW_ENFORCE_SUITE}:
+        if suite_id == "cdk-cloudformation":
+            return classify_cdk_cloudformation(envelope, artifact, fixture_id=fixture_id)
+        return classify_terraform_opentofu(envelope, artifact, fixture_id=fixture_id)
     raise ValueError(f"no live classifier configured for suite {suite_id!r}")
 
 
@@ -557,6 +764,25 @@ def _compare_live_policy_result(
             _fail(
                 errors,
                 f"{prefix}: live policy {field_name} mismatch\n"
+                f"  expected: {expected_value!r}\n"
+                f"  actual:   {actual_value!r}",
+            )
+
+
+def _compare_live_mode_response(
+    live_output: dict[str, Any],
+    expected_output: dict[str, Any],
+    errors: list[str],
+    *,
+    prefix: str,
+) -> None:
+    for field_name in MODE_RESPONSE_COMPARE_FIELDS:
+        expected_value = expected_output.get(field_name)
+        actual_value = live_output.get(field_name)
+        if expected_value != actual_value:
+            _fail(
+                errors,
+                f"{prefix}: live mode-response {field_name} mismatch\n"
                 f"  expected: {expected_value!r}\n"
                 f"  actual:   {actual_value!r}",
             )
@@ -853,7 +1079,7 @@ def run_suites(suite_ids: list[str]) -> tuple[list[CaseResult], list[str]]:
                 _fail(errors, f"{suite_id}: case IDs must be strings")
                 continue
             if suite_id == SHADOW_ENFORCE_SUITE:
-                case_result, case_errors = _validate_shadow_enforce_case(
+                case_result, case_errors = _run_live_shadow_enforce_case(
                     suite_id,
                     suite_dir,
                     case_id,
