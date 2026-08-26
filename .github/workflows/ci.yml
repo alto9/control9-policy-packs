@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install CI dependencies
+        run: pip install -r requirements-ci.txt
+
+      - name: Check PR diff whitespace
+        if: github.event_name == 'pull_request'
+        run: git fetch origin main && git diff --check origin/main...HEAD
+
+      - name: Validate policy pack
+        run: ./scripts/validate-policy-pack.sh
