@@ -6,16 +6,19 @@ POLICY_PACKS_ROOT="${POLICY_PACKS_ROOT:-$ROOT_DIR}"
 CONTROL9_POLICY_ROOT="${CONTROL9_POLICY_ROOT:-$(cd "$ROOT_DIR/../control9" && pwd)}"
 
 PACK_FIXTURE_ID="cf-terraform-deploy-fingerprint-mismatch"
+CLOUD_AUDIT_FIXTURE_ID="cf-cloud-audit-off-path"
 SUITE_FIXTURE_ID="ex-terraform-deploy-fingerprint-mismatch"
 SUITE_FIXTURE_DIR="$POLICY_PACKS_ROOT/fixtures/classifiers/suites/terraform-opentofu/$SUITE_FIXTURE_ID"
 
 PACK_GOLDEN="$POLICY_PACKS_ROOT/packs/production-infra-baseline/fixtures/expected-decisions/$PACK_FIXTURE_ID.json"
+CLOUD_AUDIT_GOLDEN="$POLICY_PACKS_ROOT/packs/production-infra-baseline/fixtures/expected-decisions/$CLOUD_AUDIT_FIXTURE_ID.json"
 SUITE_GOLDEN="$SUITE_FIXTURE_DIR/expected/policy-result.json"
 
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 PACK_OUTPUT="$TMP_DIR/pack-decision-record.json"
+CLOUD_AUDIT_OUTPUT="$TMP_DIR/cloud-audit-decision-record.json"
 SUITE_OUTPUT="$TMP_DIR/classifier-policy-result.json"
 
 echo "Building @control9/policy in $CONTROL9_POLICY_ROOT"
@@ -35,6 +38,14 @@ POLICY_PACKS_ROOT="$POLICY_PACKS_ROOT" node "$EVALUATE_FIXTURE" pack \
   --policy-packs-root "$POLICY_PACKS_ROOT" \
   --output "$PACK_OUTPUT"
 
+echo "Evaluating pack fixture $CLOUD_AUDIT_FIXTURE_ID"
+POLICY_PACKS_ROOT="$POLICY_PACKS_ROOT" node "$EVALUATE_FIXTURE" pack \
+  --fixture-id "$CLOUD_AUDIT_FIXTURE_ID" \
+  --envelope-path "inputs/cloud-audit/off-path-mutation-envelope.json" \
+  --fixture-case-path "classifier-cases.json#$CLOUD_AUDIT_FIXTURE_ID" \
+  --policy-packs-root "$POLICY_PACKS_ROOT" \
+  --output "$CLOUD_AUDIT_OUTPUT"
+
 echo "Evaluating suite fixture $SUITE_FIXTURE_ID"
 POLICY_PACKS_ROOT="$POLICY_PACKS_ROOT" node "$EVALUATE_FIXTURE" suite \
   --fixture-id "$SUITE_FIXTURE_ID" \
@@ -44,6 +55,9 @@ POLICY_PACKS_ROOT="$POLICY_PACKS_ROOT" node "$EVALUATE_FIXTURE" suite \
 
 echo "Diffing pack decision record against golden"
 diff -u "$PACK_GOLDEN" "$PACK_OUTPUT"
+
+echo "Diffing cloud-audit decision record against golden"
+diff -u "$CLOUD_AUDIT_GOLDEN" "$CLOUD_AUDIT_OUTPUT"
 
 echo "Diffing suite policy result against golden semantic fields"
 python3 - <<'PY' "$SUITE_GOLDEN" "$SUITE_OUTPUT"

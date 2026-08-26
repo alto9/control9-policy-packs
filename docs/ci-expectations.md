@@ -122,7 +122,7 @@ These checks are **not** MVP blockers but are documented boundaries for later wo
 
 ## Engine integration verification
 
-Cross-repo verification proves the control9 policy engine (`@control9/policy`) evaluates deploy-fingerprint fixtures against policy-packs golden outputs.
+Cross-repo verification proves the control9 policy engine (`@control9/policy`) evaluates deploy-fingerprint and cloud-audit fixtures against policy-packs golden outputs.
 
 From this repository:
 
@@ -142,8 +142,9 @@ Expected outcomes:
 
 - `./scripts/verify-engine-integration.sh` exits `0`
 - Pack case `cf-terraform-deploy-fingerprint-mismatch` matches `packs/production-infra-baseline/fixtures/expected-decisions/cf-terraform-deploy-fingerprint-mismatch.json`
+- Pack case `cf-cloud-audit-off-path` matches `packs/production-infra-baseline/fixtures/expected-decisions/cf-cloud-audit-off-path.json`
 - Shared suite case `ex-terraform-deploy-fingerprint-mismatch` matches semantic fields in `fixtures/classifiers/suites/terraform-opentofu/ex-terraform-deploy-fingerprint-mismatch/expected/policy-result.json`
-- Engine output includes evidence references for envelope, artifact, policy document, and fixture case with digests/paths only (no tenant fields)
+- Engine output includes evidence references for envelope, artifact (when applicable), policy document, and fixture case with digests/paths only (no tenant fields)
 
 ## Related documents
 
