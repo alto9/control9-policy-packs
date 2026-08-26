@@ -16,15 +16,18 @@ Tenant enablement, approver groups, and customer overrides belong in [control9](
 Prerequisites:
 
 - Git
-- Python 3.9+ (stdlib only for validation scripts)
+- Python 3.9+
 
-Clone the repository and run local validation from the root:
+Clone the repository, install CI validation dependencies, and run local validation from the root:
 
 ```bash
 git clone https://github.com/alto9/control9-policy-packs.git
 cd control9-policy-packs
+pip install -r requirements-ci.txt
 ./scripts/validate-policy-pack.sh
 ```
+
+Validation scripts require **PyYAML** (`requirements-ci.txt`) for decision-record checks; other validators use the Python standard library.
 
 ## Making changes
 
