@@ -22,7 +22,12 @@ Typical flow for a pack release:
 
 1. Update pack content under `packs/<pack-name>/` (policy document, fixtures, manifest).
 2. Bump `version` in `packs/<pack-name>/manifest.json`.
-3. Refresh artifact `digest` values for every referenced file.
+3. Refresh artifact `digest` values for every referenced file:
+
+   ```bash
+   python3 scripts/validate-pack-manifest.py packs/<pack-name>/manifest.json --refresh
+   ```
+
 4. Set `releaseStatus` (`draft` → `released` when criteria are met).
 5. Confirm `compatibility.policyEngine.semverRange` matches the control9 engine build that will load the pack.
 6. Run the local validation suite (see [`ci-expectations.md`](ci-expectations.md)).
@@ -78,6 +83,7 @@ Use this checklist before setting `releaseStatus: released`:
 
 - [ ] Semver bump matches the change type (patch, minor, major).
 - [ ] `manifestSchemaVersion` unchanged unless a documented migration exists.
+- [ ] Artifact and fixture digests refreshed with `--refresh` and verified in check mode.
 - [ ] All artifact and fixture digests match file contents.
 - [ ] `python3 scripts/validate-policy-pack.sh` passes locally.
 - [ ] Classifier fixtures cover every baseline rule ID and required edge situation.

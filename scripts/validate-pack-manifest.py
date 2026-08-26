@@ -9,7 +9,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 MANIFEST_SCHEMA_VERSION = "alto9.io/pack-manifest/v1alpha1"
 SEMVER_PATTERN = re.compile(
@@ -231,9 +231,27 @@ def _validate_manifest_structure(manifest: dict[str, Any], errors: list[str]) ->
             _fail(errors, "deprecation.replacement is required when releaseStatus is replaced")
 
 
-def _validate_artifact_refs(
-    manifest: dict[str, Any], pack_root: Path, errors: list[str]
-) -> None:
+def _sha256_digest_for_file(path: Path) -> str:
+    return f"sha256:{hashlib.sha256(path.read_bytes()).hexdigest()}"
+
+
+def _resolve_artifact_path(
+    pack_root: Path, path_value: str
+) -> tuple[Path | None, str | None]:
+    if not isinstance(path_value, str) or path_value.startswith("/"):
+        return None, "path must be a repository-relative path"
+    target = (pack_root / path_value).resolve()
+    pack_resolved = pack_root.resolve()
+    try:
+        target.relative_to(pack_resolved)
+    except ValueError:
+        return None, "path escapes pack root"
+    return target, None
+
+
+def _iter_artifact_entries(
+    manifest: dict[str, Any],
+) -> Iterator[tuple[str, int, dict[str, Any]]]:
     artifacts = manifest.get("artifacts")
     if not isinstance(artifacts, dict):
         return
@@ -248,31 +266,128 @@ def _validate_artifact_refs(
         if not isinstance(items, list):
             continue
         for index, item in enumerate(items):
-            prefix = f"artifacts.{collection_name}[{index}]"
-            if not isinstance(item, dict):
-                _fail(errors, f"{prefix} must be an object")
-                continue
-            path_value = item.get("path")
-            digest_value = item.get("digest")
-            if not isinstance(path_value, str) or path_value.startswith("/"):
-                _fail(errors, f"{prefix}.path must be a repository-relative path")
-                continue
-            if not isinstance(digest_value, str) or not DIGEST_PATTERN.match(digest_value):
-                _fail(errors, f"{prefix}.digest must be sha256:<hex>")
-                continue
+            if isinstance(item, dict):
+                yield collection_name, index, item
 
-            target = pack_root / path_value
-            if not target.is_file():
-                _fail(errors, f"missing referenced artifact: {target}")
-                continue
 
-            actual = hashlib.sha256(target.read_bytes()).hexdigest()
+def _validate_artifact_refs(
+    manifest: dict[str, Any],
+    pack_root: Path,
+    errors: list[str],
+    *,
+    check_digests: bool = True,
+) -> None:
+    for collection_name, index, item in _iter_artifact_entries(manifest):
+        prefix = f"artifacts.{collection_name}[{index}]"
+        path_value = item.get("path")
+        digest_value = item.get("digest")
+        if not isinstance(path_value, str) or path_value.startswith("/"):
+            _fail(errors, f"{prefix}.path must be a repository-relative path")
+            continue
+        if not isinstance(digest_value, str) or not DIGEST_PATTERN.match(digest_value):
+            _fail(errors, f"{prefix}.digest must be sha256:<hex>")
+            continue
+
+        target, path_error = _resolve_artifact_path(pack_root, path_value)
+        if path_error:
+            _fail(errors, f"{prefix}.{path_error}")
+            continue
+        assert target is not None
+
+        if not target.is_file():
+            _fail(errors, f"missing referenced artifact: {target}")
+            continue
+
+        if not check_digests:
+            continue
+
+        actual_digest = _sha256_digest_for_file(target)
+        if digest_value != actual_digest:
             expected = digest_value.removeprefix("sha256:")
-            if actual != expected:
-                _fail(
-                    errors,
-                    f"digest mismatch for {path_value}: expected sha256:{expected}, got sha256:{actual}",
-                )
+            actual = actual_digest.removeprefix("sha256:")
+            _fail(
+                errors,
+                f"digest mismatch for {path_value}: expected sha256:{expected}, got sha256:{actual}",
+            )
+
+
+def _refresh_manifest_digests(
+    manifest: dict[str, Any], pack_root: Path
+) -> tuple[int, list[str]]:
+    errors: list[str] = []
+    changes = 0
+
+    for collection_name, index, item in _iter_artifact_entries(manifest):
+        prefix = f"artifacts.{collection_name}[{index}]"
+        path_value = item.get("path")
+        digest_value = item.get("digest")
+        if not isinstance(path_value, str) or path_value.startswith("/"):
+            errors.append(f"{prefix}.path must be a repository-relative path")
+            continue
+        if not isinstance(digest_value, str) or not DIGEST_PATTERN.match(digest_value):
+            errors.append(f"{prefix}.digest must be sha256:<hex>")
+            continue
+
+        target, path_error = _resolve_artifact_path(pack_root, path_value)
+        if path_error:
+            errors.append(f"{prefix}.{path_error}")
+            continue
+        assert target is not None
+
+        if not target.is_file():
+            errors.append(f"missing referenced artifact: {target}")
+            continue
+
+        refreshed = _sha256_digest_for_file(target)
+        if digest_value != refreshed:
+            item["digest"] = refreshed
+            changes += 1
+
+    return changes, errors
+
+
+def _serialize_manifest(manifest: dict[str, Any]) -> str:
+    return json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
+
+
+def refresh_manifest(
+    manifest_path: Path,
+    *,
+    policy_engine_version: str | None = None,
+) -> tuple[int, list[str]]:
+    if not manifest_path.is_file():
+        return 0, [f"manifest not found: {manifest_path}"]
+
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return 0, [f"invalid JSON: {exc}"]
+
+    if not isinstance(manifest, dict):
+        return 0, ["manifest root must be a JSON object"]
+
+    pack_root = manifest_path.parent
+    pre_refresh_errors = validate_manifest_document(
+        manifest,
+        pack_root,
+        policy_engine_version=policy_engine_version,
+        check_digests=False,
+    )
+    if pre_refresh_errors:
+        return 0, pre_refresh_errors
+
+    changes, refresh_errors = _refresh_manifest_digests(manifest, pack_root)
+    if refresh_errors:
+        return 0, refresh_errors
+
+    if changes:
+        manifest_path.write_text(_serialize_manifest(manifest), encoding="utf-8")
+
+    post_refresh_errors = validate_manifest(
+        manifest_path,
+        policy_engine_version=policy_engine_version,
+    )
+    return changes, post_refresh_errors
 
 
 def _validate_no_tenant_fields(manifest: dict[str, Any], errors: list[str]) -> None:
@@ -318,6 +433,7 @@ def validate_manifest(
     manifest_path: Path,
     *,
     policy_engine_version: str | None = None,
+    check_digests: bool = True,
 ) -> list[str]:
     errors: list[str] = []
     if not manifest_path.is_file():
@@ -331,12 +447,12 @@ def validate_manifest(
     if not isinstance(manifest, dict):
         return ["manifest root must be a JSON object"]
 
-    _validate_no_tenant_fields(manifest, errors)
-    _validate_manifest_structure(manifest, errors)
-    _validate_artifact_refs(manifest, manifest_path.parent, errors)
-    if policy_engine_version is not None:
-        _validate_policy_engine_compatibility(manifest, policy_engine_version, errors)
-    return errors
+    return validate_manifest_document(
+        manifest,
+        manifest_path.parent,
+        policy_engine_version=policy_engine_version,
+        check_digests=check_digests,
+    )
 
 
 def validate_manifest_document(
@@ -344,11 +460,17 @@ def validate_manifest_document(
     pack_root: Path,
     *,
     policy_engine_version: str | None = None,
+    check_digests: bool = True,
 ) -> list[str]:
     errors: list[str] = []
     _validate_no_tenant_fields(manifest, errors)
     _validate_manifest_structure(manifest, errors)
-    _validate_artifact_refs(manifest, pack_root, errors)
+    _validate_artifact_refs(
+        manifest,
+        pack_root,
+        errors,
+        check_digests=check_digests,
+    )
     if policy_engine_version is not None:
         _validate_policy_engine_compatibility(manifest, policy_engine_version, errors)
     return errors
@@ -365,9 +487,35 @@ def main() -> int:
         "--policy-engine-version",
         help="Optional control9 policy-engine version to check against compatibility.policyEngine.semverRange",
     )
+    parser.add_argument(
+        "--refresh",
+        action="store_true",
+        help="Recompute sha256 digests for referenced artifacts and update the manifest when stale",
+    )
     args = parser.parse_args()
+    manifest_path = args.manifest.resolve()
+
+    if args.refresh:
+        changes, errors = refresh_manifest(
+            manifest_path,
+            policy_engine_version=args.policy_engine_version,
+        )
+        if errors:
+            print("Pack manifest refresh failed:", file=sys.stderr)
+            for error in errors:
+                print(f"  - {error}", file=sys.stderr)
+            return 1
+
+        if changes:
+            print(
+                f"OK: refreshed {changes} digest(s) in {args.manifest}",
+            )
+        else:
+            print(f"OK: digests already current in {args.manifest}")
+        return 0
+
     errors = validate_manifest(
-        args.manifest.resolve(),
+        manifest_path,
         policy_engine_version=args.policy_engine_version,
     )
     if errors:
