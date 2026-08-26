@@ -35,7 +35,12 @@ def _scan_output_for_secrets(result: dict[str, Any]) -> None:
             raise ValueError("classifier output matched forbidden secret pattern")
 
 
-def classify(envelope: dict[str, Any], artifact: dict[str, Any], *, fixture_id: str) -> dict[str, Any]:
+def classify(
+    envelope: dict[str, Any],
+    artifact: dict[str, Any],
+    *,
+    fixture_id: str,
+) -> tuple[dict[str, Any], list[tuple[str, str]]]:
     tool_family = envelope.get("toolFamily")
     if tool_family not in {"terraform", "opentofu"}:
         raise ValueError(f"unsupported toolFamily for terraform classifier: {tool_family!r}")
@@ -43,9 +48,11 @@ def classify(envelope: dict[str, Any], artifact: dict[str, Any], *, fixture_id: 
     parsed_plan = parse_plan(artifact)
     account_id = envelope.get("accountId") if isinstance(envelope.get("accountId"), str) else None
 
-    labels = envelope_labels(envelope)
-    envelope_only = set(labels)
+    envelope_only_labels = envelope_labels(envelope)
+    envelope_only = set(envelope_only_labels)
+    labels = list(envelope_only_labels)
     resource_identities: list[str] = []
+    label_resource_pairs: list[tuple[str, str]] = []
 
     for change in parsed_plan.resource_changes:
         resource_identities.append(change.address)
@@ -54,7 +61,14 @@ def classify(envelope: dict[str, Any], artifact: dict[str, Any], *, fixture_id: 
             account_id=account_id,
             envelope_only_labels=envelope_only,
         )
+        for label in resource_labels:
+            label_resource_pairs.append((label, change.address))
         labels.extend(resource_labels)
+
+    unique_addresses = _sorted_unique(resource_identities)
+    for env_label in envelope_only_labels:
+        for address in unique_addresses:
+            label_resource_pairs.append((env_label, address))
 
     parser_limitations: list[str] = []
     if parsed_plan.has_partial_summary:
@@ -63,7 +77,7 @@ def classify(envelope: dict[str, Any], artifact: dict[str, Any], *, fixture_id: 
 
     classifier_labels = _sorted_unique(labels)
     change_types = _policy_change_types(classifier_labels)
-    sorted_identities = _sorted_unique(resource_identities)
+    sorted_identities = unique_addresses
 
     result = {
         "fixtureResultSchemaVersion": FIXTURE_RESULT_SCHEMA_VERSION,
@@ -75,4 +89,4 @@ def classify(envelope: dict[str, Any], artifact: dict[str, Any], *, fixture_id: 
         "parserLimitations": parser_limitations,
     }
     _scan_output_for_secrets(result)
-    return result
+    return result, label_resource_pairs
