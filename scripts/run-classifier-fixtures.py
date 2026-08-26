@@ -15,6 +15,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from classifiers.cdk_cloudformation import classify as classify_cdk_cloudformation
+from classifiers.policy_evaluate import evaluate_policy
 from classifiers.terraform_opentofu.classify import classify as classify_terraform_opentofu
 
 FIXTURES_ROOT = REPO_ROOT / "fixtures" / "classifiers"
@@ -31,7 +33,7 @@ SECRET_PATTERNS = [
 
 KNOWN_SUITES = ("cdk-cloudformation", "terraform-opentofu", "shadow-enforce")
 SHADOW_ENFORCE_SUITE = "shadow-enforce"
-LIVE_CLASSIFIER_SUITES = frozenset({"terraform-opentofu"})
+LIVE_CLASSIFIER_SUITES = frozenset({"cdk-cloudformation", "terraform-opentofu"})
 CLASSIFIER_COMPARE_FIELDS = (
     "fixtureResultSchemaVersion",
     "fixtureId",
@@ -40,6 +42,13 @@ CLASSIFIER_COMPARE_FIELDS = (
     "changeTypes",
     "resourceIdentities",
     "parserLimitations",
+)
+POLICY_COMPARE_FIELDS = (
+    "fixtureResultSchemaVersion",
+    "fixtureId",
+    "toolFamily",
+    "matchedRules",
+    "evidenceReferences",
 )
 
 
@@ -520,6 +529,39 @@ def _validate_shadow_enforce_case(
     return result, errors
 
 
+def _classify_live(
+    suite_id: str,
+    envelope: dict[str, Any],
+    artifact: dict[str, Any],
+    *,
+    fixture_id: str,
+) -> tuple[dict[str, Any], list[tuple[str, str]] | None]:
+    if suite_id == "cdk-cloudformation":
+        return classify_cdk_cloudformation(envelope, artifact, fixture_id=fixture_id)
+    if suite_id == "terraform-opentofu":
+        return classify_terraform_opentofu(envelope, artifact, fixture_id=fixture_id), None
+    raise ValueError(f"no live classifier configured for suite {suite_id!r}")
+
+
+def _compare_live_policy_result(
+    live_output: dict[str, Any],
+    expected_output: dict[str, Any],
+    errors: list[str],
+    *,
+    prefix: str,
+) -> None:
+    for field_name in POLICY_COMPARE_FIELDS:
+        expected_value = expected_output.get(field_name)
+        actual_value = live_output.get(field_name)
+        if expected_value != actual_value:
+            _fail(
+                errors,
+                f"{prefix}: live policy {field_name} mismatch\n"
+                f"  expected: {expected_value!r}\n"
+                f"  actual:   {actual_value!r}",
+            )
+
+
 def _compare_live_classifier_output(
     live_output: dict[str, Any],
     expected_output: dict[str, Any],
@@ -587,10 +629,12 @@ def _run_live_classifier_case(
             )
 
     live_classifier: dict[str, Any] | None = None
+    label_resource_pairs: list[tuple[str, str]] | None = None
     tool_family = ""
     if envelope is not None and artifact is not None and not errors:
         try:
-            live_classifier = classify_terraform_opentofu(
+            live_classifier, label_resource_pairs = _classify_live(
+                suite_id,
                 envelope,
                 artifact,
                 fixture_id=case_id,
@@ -620,17 +664,47 @@ def _run_live_classifier_case(
             prefix=f"{prefix}/classifier-output.json",
         )
 
-    policy_result = _load_json(policy_path, errors, label=prefix) if policy_path.is_file() else None
-    comparison_classifier = expected_classifier if expected_classifier is not None else live_classifier
-    if policy_result is not None and comparison_classifier is not None:
+    expected_policy = _load_json(policy_path, errors, label=prefix) if policy_path.is_file() else None
+    comparison_classifier = live_classifier if live_classifier is not None else expected_classifier
+    if expected_policy is not None and comparison_classifier is not None and suite_id != "cdk-cloudformation":
         _validate_policy_result(
-            policy_result,
+            expected_policy,
             comparison_classifier,
             errors,
             prefix=f"{prefix}/expected/policy-result.json",
             expected_fixture_id=case_id,
             allowed_tool_families=allowed_tool_families,
         )
+
+    if (
+        suite_id == "cdk-cloudformation"
+        and live_classifier is not None
+        and expected_policy is not None
+        and envelope is not None
+        and label_resource_pairs is not None
+        and not errors
+    ):
+        try:
+            live_policy = evaluate_policy(
+                envelope,
+                live_classifier,
+                fixture_id=case_id,
+                label_resource_pairs=label_resource_pairs,
+            )
+        except ValueError as exc:
+            _fail(errors, f"{prefix}: live policy evaluation failed: {exc}")
+        else:
+            _scan_secrets_text(
+                json.dumps(live_policy, separators=(",", ":"), sort_keys=True),
+                errors,
+                label=f"{prefix}/live policy output",
+            )
+            _compare_live_policy_result(
+                live_policy,
+                expected_policy,
+                errors,
+                prefix=f"{prefix}/policy-result.json",
+            )
 
     labels = list((live_classifier or {}).get("classifierLabels") or [])
     passed = not errors
