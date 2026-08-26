@@ -120,6 +120,31 @@ These checks are **not** MVP blockers but are documented boundaries for later wo
 - Shadow vs enforce mode parity tests owned jointly with control9
 - OPA/Rego import/export validation (optional enterprise boundary; see [`policy-authoring.md`](policy-authoring.md))
 
+## Engine integration verification
+
+Cross-repo verification proves the control9 policy engine (`@control9/policy`) evaluates deploy-fingerprint fixtures against policy-packs golden outputs.
+
+From this repository:
+
+```bash
+cd control9/control9-policy-packs
+POLICY_PACKS_ROOT=. CONTROL9_POLICY_ROOT=../control9 ./scripts/verify-engine-integration.sh
+```
+
+From the control9 monorepo:
+
+```bash
+cd control9
+POLICY_PACKS_ROOT=./control9-policy-packs npm test -w @control9/policy
+```
+
+Expected outcomes:
+
+- `./scripts/verify-engine-integration.sh` exits `0`
+- Pack case `cf-terraform-deploy-fingerprint-mismatch` matches `packs/production-infra-baseline/fixtures/expected-decisions/cf-terraform-deploy-fingerprint-mismatch.json`
+- Shared suite case `ex-terraform-deploy-fingerprint-mismatch` matches semantic fields in `fixtures/classifiers/suites/terraform-opentofu/ex-terraform-deploy-fingerprint-mismatch/expected/policy-result.json`
+- Engine output includes evidence references for envelope, artifact, policy document, and fixture case with digests/paths only (no tenant fields)
+
 ## Related documents
 
 - [`release-process.md`](release-process.md)
