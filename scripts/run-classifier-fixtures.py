@@ -12,6 +12,11 @@ from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from classifiers.terraform_opentofu.classify import classify as classify_terraform_opentofu
+
 FIXTURES_ROOT = REPO_ROOT / "fixtures" / "classifiers"
 SUITES_ROOT = FIXTURES_ROOT / "suites"
 
@@ -26,6 +31,16 @@ SECRET_PATTERNS = [
 
 KNOWN_SUITES = ("cdk-cloudformation", "terraform-opentofu", "shadow-enforce")
 SHADOW_ENFORCE_SUITE = "shadow-enforce"
+LIVE_CLASSIFIER_SUITES = frozenset({"terraform-opentofu"})
+CLASSIFIER_COMPARE_FIELDS = (
+    "fixtureResultSchemaVersion",
+    "fixtureId",
+    "toolFamily",
+    "classifierLabels",
+    "changeTypes",
+    "resourceIdentities",
+    "parserLimitations",
+)
 
 
 @dataclass
@@ -76,12 +91,13 @@ def _load_json(path: Path, errors: list[str], *, label: str) -> dict[str, Any] |
 
 def _scan_secrets(path: Path, errors: list[str]) -> None:
     text = path.read_text(encoding="utf-8")
+    _scan_secrets_text(text, errors, label=str(path.relative_to(REPO_ROOT)))
+
+
+def _scan_secrets_text(text: str, errors: list[str], *, label: str) -> None:
     for pattern in SECRET_PATTERNS:
         if pattern.search(text):
-            _fail(
-                errors,
-                f"possible secret pattern in {path.relative_to(REPO_ROOT)}",
-            )
+            _fail(errors, f"possible secret pattern in {label}")
 
 
 def _compare_list_field(
@@ -504,6 +520,131 @@ def _validate_shadow_enforce_case(
     return result, errors
 
 
+def _compare_live_classifier_output(
+    live_output: dict[str, Any],
+    expected_output: dict[str, Any],
+    errors: list[str],
+    *,
+    prefix: str,
+) -> None:
+    for field_name in CLASSIFIER_COMPARE_FIELDS:
+        expected_value = expected_output.get(field_name)
+        actual_value = live_output.get(field_name)
+        if field_name == "parserLimitations" and actual_value is None:
+            actual_value = []
+        if expected_value != actual_value:
+            _fail(
+                errors,
+                f"{prefix}: live classifier {field_name} mismatch\n"
+                f"  expected: {expected_value!r}\n"
+                f"  actual:   {actual_value!r}",
+            )
+
+
+def _run_live_classifier_case(
+    suite_id: str,
+    suite_dir: Path,
+    case_id: str,
+    allowed_tool_families: set[str],
+) -> tuple[CaseResult, list[str]]:
+    errors: list[str] = []
+    case_dir = suite_dir / case_id
+    prefix = f"{suite_id}/{case_id}"
+
+    required_paths = [
+        case_dir / "notes.md",
+        case_dir / "input" / "envelope.json",
+        case_dir / "input" / "artifact.json",
+        case_dir / "expected" / "classifier-output.json",
+        case_dir / "expected" / "policy-result.json",
+    ]
+    for path in required_paths:
+        if not path.is_file():
+            _fail(errors, f"{prefix}: missing required file {path.relative_to(REPO_ROOT)}")
+
+    envelope_path = case_dir / "input" / "envelope.json"
+    artifact_path = case_dir / "input" / "artifact.json"
+    classifier_path = case_dir / "expected" / "classifier-output.json"
+    policy_path = case_dir / "expected" / "policy-result.json"
+
+    scan_paths = [case_dir / "notes.md", envelope_path, artifact_path, classifier_path, policy_path]
+    for path in scan_paths:
+        if path.is_file():
+            _scan_secrets(path, errors)
+
+    envelope = _load_json(envelope_path, errors, label=prefix) if envelope_path.is_file() else None
+    artifact = _load_json(artifact_path, errors, label=prefix) if artifact_path.is_file() else None
+    expected_classifier = (
+        _load_json(classifier_path, errors, label=prefix) if classifier_path.is_file() else None
+    )
+
+    if envelope is not None:
+        envelope_family = envelope.get("toolFamily")
+        if envelope_family not in allowed_tool_families:
+            _fail(
+                errors,
+                f"{prefix}: envelope toolFamily {envelope_family!r} not allowed for suite {suite_id}",
+            )
+
+    live_classifier: dict[str, Any] | None = None
+    tool_family = ""
+    if envelope is not None and artifact is not None and not errors:
+        try:
+            live_classifier = classify_terraform_opentofu(
+                envelope,
+                artifact,
+                fixture_id=case_id,
+            )
+        except ValueError as exc:
+            _fail(errors, f"{prefix}: live classifier failed: {exc}")
+        else:
+            _scan_secrets_text(
+                json.dumps(live_classifier, separators=(",", ":"), sort_keys=True),
+                errors,
+                label=f"{prefix}/live classifier output",
+            )
+            validated_family = _validate_classifier_output(
+                live_classifier,
+                errors,
+                prefix=f"{prefix}/live classifier output",
+                expected_fixture_id=case_id,
+                allowed_tool_families=allowed_tool_families,
+            )
+            tool_family = validated_family or ""
+
+    if live_classifier is not None and expected_classifier is not None:
+        _compare_live_classifier_output(
+            live_classifier,
+            expected_classifier,
+            errors,
+            prefix=f"{prefix}/classifier-output.json",
+        )
+
+    policy_result = _load_json(policy_path, errors, label=prefix) if policy_path.is_file() else None
+    comparison_classifier = expected_classifier if expected_classifier is not None else live_classifier
+    if policy_result is not None and comparison_classifier is not None:
+        _validate_policy_result(
+            policy_result,
+            comparison_classifier,
+            errors,
+            prefix=f"{prefix}/expected/policy-result.json",
+            expected_fixture_id=case_id,
+            allowed_tool_families=allowed_tool_families,
+        )
+
+    labels = list((live_classifier or {}).get("classifierLabels") or [])
+    passed = not errors
+    result = CaseResult(
+        suite_id=suite_id,
+        fixture_id=case_id,
+        tool_family=tool_family,
+        passed=passed,
+        labels=labels,
+        failure_reason=errors[0] if errors else None,
+    )
+    return result, errors
+
+
 def _validate_case(
     suite_id: str,
     suite_dir: Path,
@@ -644,6 +785,13 @@ def run_suites(suite_ids: list[str]) -> tuple[list[CaseResult], list[str]]:
                     case_id,
                     allowed_tool_families,
                     str(manifest.get("packVersion") or ""),
+                )
+            elif suite_id in LIVE_CLASSIFIER_SUITES:
+                case_result, case_errors = _run_live_classifier_case(
+                    suite_id,
+                    suite_dir,
+                    case_id,
+                    allowed_tool_families,
                 )
             else:
                 case_result, case_errors = _validate_case(
