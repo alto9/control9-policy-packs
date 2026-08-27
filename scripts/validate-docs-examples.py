@@ -30,7 +30,7 @@ REQUIRED_EXAMPLE_DIRS = [
     "examples/decisions",
 ]
 
-EXAMPLE_MANIFEST = REPO_ROOT / "examples/manifests/production-infra-baseline.v0.1.0.json"
+EXAMPLE_MANIFEST = REPO_ROOT / "examples/manifests/production-infra-baseline.v1.0.0.json"
 WORKING_MANIFEST = REPO_ROOT / "packs/production-infra-baseline/manifest.json"
 
 EXAMPLE_MANIFEST_REQUIRED = {

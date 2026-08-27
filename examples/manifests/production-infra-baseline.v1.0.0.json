@@ -3,7 +3,7 @@
   "pack": {
     "name": "production-infra-baseline",
     "displayName": "Production Infrastructure Baseline",
-    "description": "Built-in baseline pack for production mutation, IAM expansion, destructive changes, network boundaries, secrets hints, pipeline sources, cost thresholds, deploy verification mismatch, and off-path findings."
+    "description": "Example manifest for reviewers. Mirrors packs/production-infra-baseline/manifest.json at v1.0.0."
   },
   "version": "1.0.0",
   "releaseStatus": "released",
@@ -35,8 +35,6 @@
     "sourceRepository": "https://github.com/alto9/control9-policy-packs",
     "sourceRef": "production-infra-baseline/v1.0.0",
     "contentOrigin": "repository",
-    "maintainers": [
-      "platform-engineering"
-    ]
+    "maintainers": ["platform-engineering"]
   }
 }
