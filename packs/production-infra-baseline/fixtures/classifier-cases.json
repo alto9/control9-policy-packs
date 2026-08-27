@@ -1,7 +1,7 @@
 {
   "classifierFixtureSchemaVersion": "alto9.io/classifier-fixture/v1alpha1",
   "packName": "production-infra-baseline",
-  "packVersion": "0.1.0",
+  "packVersion": "1.0.0",
   "description": "Deterministic classifier input fixtures and expected semantic labels for baseline production infrastructure risks.",
   "outputOrdering": {
     "description": "Matched classifier labels and rule IDs sort by severity rank, decision rank, ruleId, classifierLabel, then resourceIdentity (all ascending).",

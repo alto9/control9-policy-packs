@@ -2,7 +2,7 @@
   "compatibilityResultSchemaVersion": "alto9.io/compatibility-result/v1alpha1",
   "fixtureId": "ex-valid-production-baseline",
   "packName": "production-infra-baseline",
-  "packVersion": "0.1.0",
+  "packVersion": "1.0.0",
   "compatible": true,
   "failureReasons": []
 }

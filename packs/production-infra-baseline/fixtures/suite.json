@@ -1,7 +1,7 @@
 {
   "fixtureSuiteSchemaVersion": "alto9.io/fixture-suite/v1alpha1",
   "packName": "production-infra-baseline",
-  "packVersion": "0.1.0",
+  "packVersion": "1.0.0",
   "description": "Deterministic fixture expectations for baseline rule categories and classifier input fixtures.",
   "suites": [
     {
